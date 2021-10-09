@@ -56,6 +56,7 @@ app.get("/submit-work", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         // const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
         const nonce = bignumber_1.BigNumber.from(req.query.nonce);
         const address = req.query.address;
+        console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
         const isFullyValid = yield (0, check_nonce_1.checkNonce)({
             nonce,
             senderAddr: address,

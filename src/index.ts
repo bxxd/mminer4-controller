@@ -69,6 +69,8 @@ app.get(
       const nonce = BigNumber.from(req.query.nonce);
       const address = req.query.address;
 
+      console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
+
 
       const isFullyValid = await checkNonce({
         nonce,
