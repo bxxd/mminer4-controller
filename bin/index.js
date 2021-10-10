@@ -21,6 +21,7 @@ const check_nonce_1 = require("./services/check-nonce");
 const get_mining_inputs_1 = require("./services/get-mining-inputs");
 const util_1 = require("./services/util");
 require("dotenv").config({ path: path_1.default.resolve(process.cwd(), ".env.local") });
+var config = require(path_1.default.resolve(process.cwd(), "config.local.js"));
 require("console-stamp")(console, "m-d HH:MM:ss");
 const DEFAULT_PORT = "17394";
 const app = (0, express_1.default)();
@@ -75,6 +76,7 @@ app.get("/submit-work", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         const submit_work = {
             address: address,
             nonce: nonce,
+            last: req.query.last || "<empty>",
         };
         console.log("/submit-work", getIP(req), submit_work);
         // console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
@@ -193,6 +195,7 @@ const LICENSE_ENV_VARIABLES = [
 ];
 var server = app.listen(port, () => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Hi There!");
+    console.log(config);
     try {
         console.log("Initializing...");
         for (let envVariable of REQUIRED_ENV_VARIABLES) {
