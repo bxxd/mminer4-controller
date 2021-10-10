@@ -22,10 +22,11 @@
     "dotenv": "^10.0.0",
     "ethers": "^5.4.6",
     "express": "^4.17.1",
+    "mailgun-js": "^0.22.0",
     "ts-node": "^10.2.1",
+    "twilio": "^3.69.0",
     "web3": "^1.5.2",
     "web3-providers-http": "^1.5.2"
-    
   },
   "devDependencies": {
     "@testdeck/mocha": "^0.1.2",

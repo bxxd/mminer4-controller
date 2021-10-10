@@ -23,7 +23,7 @@ const getMiningInputs = ({ senderAddress, }) => __awaiter(void 0, void 0, void 0
     if (lastGet != null) {
         console.log(now - lastGet);
     }
-    if (lastGet == null || now - lastGet > 60) {
+    if (lastGet == null || now - lastGet > 300) {
         console.log("setting new mining inputs values");
         lastMinedAssets = (yield mineablePunks.lastMinedPunkAssets())._hex;
         difficultyTarget = (yield mineablePunks.difficultyTarget())._hex;
