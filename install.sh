@@ -12,3 +12,9 @@ curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt update
 sudo apt install yarn
+
+npm install pm2 
+npm install -g ts-node
+pm2 install typescript
+ 
+# "pm2": "^5.1.2"

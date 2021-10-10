@@ -11,6 +11,7 @@ import { getProvider, sleep } from "./services/util";
 import { getLast72AddressBits, mpunksSolidityKeccak256 } from "./services/util";
 
 require("dotenv").config({ path: path.resolve(process.cwd(), ".env.local") });
+require("console-stamp")(console, "m-d HH:MM:ss");
 
 const DEFAULT_PORT = "17394";
 const app = express();
@@ -18,6 +19,18 @@ const port = process.env.PORT;
 if (port !== DEFAULT_PORT) {
   console.warn(`PORT has been changed from the default of ${DEFAULT_PORT}.`);
 }
+
+process.on("SIGINT", function () {
+  console.log("SIGINT.");
+  server.close();
+  process.exit();
+});
+
+process.on("SIGTERM", function () {
+  console.log("SIGTERM.");
+  server.close();
+  process.exit();
+});
 
 type SubmitPingQuery = {
   nonce?: string;
@@ -28,7 +41,6 @@ type SubmitWorkQuery = {
   nonce?: string;
   address?: string;
 };
-
 
 const STATUS = {
   success: "success",
@@ -43,10 +55,16 @@ function success(payload: any) {
 }
 
 function err(payload: any) {
+  console.log("payload", payload);
   return {
     status: STATUS.error,
     payload,
   };
+}
+
+function getIP(req: any) {
+  var ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || null;
+  return ip;
 }
 
 app.get(
@@ -65,12 +83,16 @@ app.get(
       // const provider = getProvider();
       // const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
 
-
       const nonce = BigNumber.from(req.query.nonce);
       const address = req.query.address;
 
-      console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
+      const submit_work = {
+        address: address,
+        nonce: nonce,
+      };
+      console.log("/submit-work", getIP(req), submit_work);
 
+      // console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
 
       const isFullyValid = await checkNonce({
         nonce,
@@ -101,7 +123,6 @@ app.get(
   "/submit-ping",
   async (req: Request<any, any, any, SubmitPingQuery>, res, next) => {
     try {
-
       // if (!process.env.PRIVATE_KEY) {
       //   throw new Error("PRIVATE_KEY must be set to use this endpoint.");
       // }
@@ -114,16 +135,14 @@ app.get(
         throw new Error("Missing address parameter.");
       }
 
-
       const nonce = BigNumber.from(req.query.nonce);
       const address = req.query.address;
 
       const isFullyValid = await checkNonceLocal({
         nonce,
         senderAddr: address,
-        difficulty: BigNumber.from("0x7a2aff56698420")
+        difficulty: BigNumber.from("0x7a2aff56698420"),
       });
-
 
       // const nonce = BigNumber.from(req.query.nonce);
       // const provider = getProvider();
@@ -168,6 +187,7 @@ app.get("/mining-inputs", async (req, res, next) => {
     }
 
     const miningInputs = await getMiningInputs({ senderAddress });
+    console.log(getIP(req), miningInputs);
     res.send(success(miningInputs));
   } catch (e) {
     res.send(err(e));
@@ -188,7 +208,7 @@ app.get(
         type: "heartbeat",
         hashrate: req.query.hashrate || "<empty>",
       };
-      console.log(heartbeat);
+      console.log(getIP(req), heartbeat);
       res.send(success({}));
     } catch (e) {
       res.send(err(e));
@@ -210,9 +230,14 @@ const REQUIRED_ENV_VARIABLES = [
   "READ_NOTICE",
 ];
 
-const LICENSE_ENV_VARIABLES = ["ACCEPT_LICENSE", "READ_NOTICE", "ACCEPT_MAX_GAS_PRICE_GWEI_VALUE"];
+const LICENSE_ENV_VARIABLES = [
+  "ACCEPT_LICENSE",
+  "READ_NOTICE",
+  "ACCEPT_MAX_GAS_PRICE_GWEI_VALUE",
+];
 
-app.listen(port, async () => {
+var server = app.listen(port, async () => {
+  console.log("Hi There!");
   try {
     console.log("Initializing...");
     for (let envVariable of REQUIRED_ENV_VARIABLES) {
@@ -247,10 +272,12 @@ app.listen(port, async () => {
     console.log(`Server started.`);
   } catch (e) {
     console.error(`Failed to start server: ${e}`);
-    console.log("Keeping the console up so that you can see the error. Close out of the application whenever...")
+    console.log(
+      "Keeping the console up so that you can see the error. Close out of the application whenever..."
+    );
 
     while (true) {
-      await sleep(300)
+      await sleep(300);
     }
   }
 });

@@ -19,19 +19,26 @@ export const checkNonce = async ({
     .connect(senderAddr)
     .isValidNonce(nonce);
 
-  if (!passesDifficultyTest) {
-    console.error(`Nonce ${nonce._hex} does not pass difficulty test`);
-    return false;
-  }
   const lastMinedAssets = await mineablePunks.lastMinedPunkAssets();
   const senderAddrBits = getLast72AddressBits(senderAddr);
+  const hash = mpunksSolidityKeccak256(lastMinedAssets, senderAddrBits, nonce);
+  console.log("hash: %s", hash._hex);
+
+  if (!passesDifficultyTest) {
+    throw new Error(`Nonce ${nonce._hex} does not pass difficulty test`);
+    return false;
+  }
+
   const seed = mpunksSolidityKeccak256(lastMinedAssets, senderAddrBits, nonce);
   const otherPunks = getOtherPunks();
   const packedAssets = await otherPunks.seedToPunkAssets(seed);
 
   const existingPunkId = await mineablePunks.punkAssetsToId(packedAssets);
   if (existingPunkId.gt(BigNumber.from(0))) {
-    console.error(
+    // console.error(
+    //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
+    // );
+    throw new Error(
       `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
     );
     return false;
@@ -56,16 +63,15 @@ export const checkNonce = async ({
 export const checkNonceLocal = async ({
   nonce,
   senderAddr,
-  difficulty
+  difficulty,
 }: {
   nonce: BigNumber;
   senderAddr: string;
   difficulty: BigNumber;
 }): Promise<boolean> => {
-
   const mineablePunks = getMineablePunks();
 
-  const lastMinedAssets = BigNumber.from(0);//await mineablePunks.lastMinedPunkAssets();
+  const lastMinedAssets = await mineablePunks.lastMinedPunkAssets();
   const senderAddrBits = getLast72AddressBits(senderAddr);
   const hash = mpunksSolidityKeccak256(lastMinedAssets, senderAddrBits, nonce);
   console.log("hash: %s", hash._hex);

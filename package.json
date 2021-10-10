@@ -18,12 +18,14 @@
   "dependencies": {
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
+    "console-stamp": "^3.0.3",
     "dotenv": "^10.0.0",
     "ethers": "^5.4.6",
     "express": "^4.17.1",
     "ts-node": "^10.2.1",
     "web3": "^1.5.2",
     "web3-providers-http": "^1.5.2"
+    
   },
   "devDependencies": {
     "@testdeck/mocha": "^0.1.2",

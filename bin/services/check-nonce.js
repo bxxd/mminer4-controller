@@ -19,18 +19,23 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
     const passesDifficultyTest = yield mineablePunks
         .connect(senderAddr)
         .isValidNonce(nonce);
-    if (!passesDifficultyTest) {
-        console.error(`Nonce ${nonce._hex} does not pass difficulty test`);
-        return false;
-    }
     const lastMinedAssets = yield mineablePunks.lastMinedPunkAssets();
     const senderAddrBits = (0, util_1.getLast72AddressBits)(senderAddr);
+    const hash = (0, util_1.mpunksSolidityKeccak256)(lastMinedAssets, senderAddrBits, nonce);
+    console.log("hash: %s", hash._hex);
+    if (!passesDifficultyTest) {
+        throw new Error(`Nonce ${nonce._hex} does not pass difficulty test`);
+        return false;
+    }
     const seed = (0, util_1.mpunksSolidityKeccak256)(lastMinedAssets, senderAddrBits, nonce);
     const otherPunks = (0, contracts_1.getOtherPunks)();
     const packedAssets = yield otherPunks.seedToPunkAssets(seed);
     const existingPunkId = yield mineablePunks.punkAssetsToId(packedAssets);
     if (existingPunkId.gt(bignumber_1.BigNumber.from(0))) {
-        console.error(`Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`);
+        // console.error(
+        //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
+        // );
+        throw new Error(`Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`);
         return false;
     }
     const publicCryptopunksData = (0, contracts_1.getPublicCryptopunksData)();
@@ -43,9 +48,9 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
     return true;
 });
 exports.checkNonce = checkNonce;
-const checkNonceLocal = ({ nonce, senderAddr, difficulty }) => __awaiter(void 0, void 0, void 0, function* () {
+const checkNonceLocal = ({ nonce, senderAddr, difficulty, }) => __awaiter(void 0, void 0, void 0, function* () {
     const mineablePunks = (0, contracts_1.getMineablePunks)();
-    const lastMinedAssets = bignumber_1.BigNumber.from(0); //await mineablePunks.lastMinedPunkAssets();
+    const lastMinedAssets = yield mineablePunks.lastMinedPunkAssets();
     const senderAddrBits = (0, util_1.getLast72AddressBits)(senderAddr);
     const hash = (0, util_1.mpunksSolidityKeccak256)(lastMinedAssets, senderAddrBits, nonce);
     console.log("hash: %s", hash._hex);

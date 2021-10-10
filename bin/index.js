@@ -21,12 +21,23 @@ const check_nonce_1 = require("./services/check-nonce");
 const get_mining_inputs_1 = require("./services/get-mining-inputs");
 const util_1 = require("./services/util");
 require("dotenv").config({ path: path_1.default.resolve(process.cwd(), ".env.local") });
+require("console-stamp")(console, "m-d HH:MM:ss");
 const DEFAULT_PORT = "17394";
 const app = (0, express_1.default)();
 const port = process.env.PORT;
 if (port !== DEFAULT_PORT) {
     console.warn(`PORT has been changed from the default of ${DEFAULT_PORT}.`);
 }
+process.on("SIGINT", function () {
+    console.log("SIGINT.");
+    server.close();
+    process.exit();
+});
+process.on("SIGTERM", function () {
+    console.log("SIGTERM.");
+    server.close();
+    process.exit();
+});
 const STATUS = {
     success: "success",
     error: "error",
@@ -38,10 +49,15 @@ function success(payload) {
     };
 }
 function err(payload) {
+    console.log("payload", payload);
     return {
         status: STATUS.error,
         payload,
     };
+}
+function getIP(req) {
+    var ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || null;
+    return ip;
 }
 app.get("/submit-work", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -56,7 +72,12 @@ app.get("/submit-work", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         // const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
         const nonce = bignumber_1.BigNumber.from(req.query.nonce);
         const address = req.query.address;
-        console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
+        const submit_work = {
+            address: address,
+            nonce: nonce,
+        };
+        console.log("/submit-work", getIP(req), submit_work);
+        // console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
         const isFullyValid = yield (0, check_nonce_1.checkNonce)({
             nonce,
             senderAddr: address,
@@ -93,7 +114,7 @@ app.get("/submit-ping", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         const isFullyValid = yield (0, check_nonce_1.checkNonceLocal)({
             nonce,
             senderAddr: address,
-            difficulty: bignumber_1.BigNumber.from("0x7a2aff56698420")
+            difficulty: bignumber_1.BigNumber.from("0x7a2aff56698420"),
         });
         // const nonce = BigNumber.from(req.query.nonce);
         // const provider = getProvider();
@@ -130,6 +151,7 @@ app.get("/mining-inputs", (req, res, next) => __awaiter(void 0, void 0, void 0, 
             throw new Error("PRIVATE_KEY or ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS must be set to use this endpoint.");
         }
         const miningInputs = yield (0, get_mining_inputs_1.getMiningInputs)({ senderAddress });
+        console.log(getIP(req), miningInputs);
         res.send(success(miningInputs));
     }
     catch (e) {
@@ -144,7 +166,7 @@ app.get("/heartbeat", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             type: "heartbeat",
             hashrate: req.query.hashrate || "<empty>",
         };
-        console.log(heartbeat);
+        console.log(getIP(req), heartbeat);
         res.send(success({}));
     }
     catch (e) {
@@ -164,8 +186,13 @@ const REQUIRED_ENV_VARIABLES = [
     "ACCEPT_LICENSE",
     "READ_NOTICE",
 ];
-const LICENSE_ENV_VARIABLES = ["ACCEPT_LICENSE", "READ_NOTICE", "ACCEPT_MAX_GAS_PRICE_GWEI_VALUE"];
-app.listen(port, () => __awaiter(void 0, void 0, void 0, function* () {
+const LICENSE_ENV_VARIABLES = [
+    "ACCEPT_LICENSE",
+    "READ_NOTICE",
+    "ACCEPT_MAX_GAS_PRICE_GWEI_VALUE",
+];
+var server = app.listen(port, () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Hi There!");
     try {
         console.log("Initializing...");
         for (let envVariable of REQUIRED_ENV_VARIABLES) {
