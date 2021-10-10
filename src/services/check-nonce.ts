@@ -100,7 +100,7 @@ export const checkNonce = async ({
   const client = new twilio(accountSid, authToken);
 
   if (error == null) {
-    console.log("trying to send nonce found");
+    console.log("trying to send nonce found test");
     client.messages
       .create({
         body: `NONCE FOUND ${nonce._hex} address ${senderAddr}`,
