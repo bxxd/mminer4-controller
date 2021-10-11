@@ -26,6 +26,7 @@ export const getMiningInputs = async ({
     console.log(now - lastGet);
   }
   if (lastGet == null || now - lastGet > 300) {
+    lastGet = Math.round(Date.now() / 1000);
     console.log("setting new mining inputs values");
     lastMinedAssets = (await mineablePunks.lastMinedPunkAssets())._hex;
     difficultyTarget = (await mineablePunks.difficultyTarget())._hex;
