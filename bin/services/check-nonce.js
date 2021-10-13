@@ -33,6 +33,7 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
         const seed = (0, util_1.mpunksSolidityKeccak256)(lastMinedAssets, senderAddrBits, nonce);
         const otherPunks = (0, contracts_1.getOtherPunks)();
         const packedAssets = yield otherPunks.seedToPunkAssets(seed);
+        console.log("packedAssets:", packedAssets);
         const existingPunkId = yield mineablePunks.punkAssetsToId(packedAssets);
         if (existingPunkId.gt(bignumber_1.BigNumber.from(0))) {
             // console.error(
@@ -57,65 +58,71 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
             }
         }
     }
-    var api_key = "bd3115342ab0f399f4067c1a77359621-443ec20e-691dc4d5";
-    var domain = "sandbox430ddc20186a4c6585375e6f8604cd28.mailgun.org";
-    var mailgun = require("mailgun-js")({ apiKey: api_key, domain: domain });
-    var data = {
-        from: "Excited User <me@samples.mailgun.org>",
-        to: "bxxd.eth@gmail.com",
-        subject: ">> NONCE FOUND",
-        text: "Testing some Mailgun awesomeness!",
-    };
     if (error != null) {
-        data.text = `Nonce was found but was error: ${error}`;
+        console.log("success");
     }
-    else {
-        data.text = `Nonce found ${nonce._hex} for address ${senderAddr}`;
-    }
-    mailgun.messages().send(data, function (err, body) {
-        console.log(err, body);
-    });
-    data.to = "diwrecktor4582154@gmail.com";
-    mailgun.messages().send(data, function (err, body) {
-        console.log(err, body);
-    });
-    const accountSid = "ACdbba03391efdaf19c2eddc9c4fe5380e"; // Your Account SID from www.twilio.com/console
-    const authToken = "774c7b5c1abf361956149a0f3c950f25"; // Your Auth Token from www.twilio.com/console
-    const twilio = require("twilio");
-    const client = new twilio(accountSid, authToken);
-    if (error == null) {
-        console.log("trying to send nonce found");
-        client.messages
-            .create({
-            body: `NONCE FOUND ${nonce._hex} address ${senderAddr}`,
-            to: "+13476109150",
-            from: "+12183962228", // From a valid Twilio number
-        })
-            .then((message) => console.log("here:", message));
-        client.messages
-            .create({
-            body: `NONCE FOUND ${nonce._hex} address ${senderAddr}`,
-            to: "+12017367833",
-            from: "+12183962228", // From a valid Twilio number
-        })
-            .then((message) => console.log("here:", message));
-    }
-    else {
-        console.log("trying to send nonce error");
-        client.messages
-            .create({
-            body: error,
-            to: "+13476109150",
-            from: "+12183962228", // From a valid Twilio number
-        })
-            .then((message) => console.log("here2:", message, message.sid));
-        client.messages
-            .create({
-            body: error,
-            to: "+12017367833",
-            from: "+12183962228", // From a valid Twilio number
-        })
-            .then((message) => console.log("here2:", message, message.sid));
+    if (true) {
+        // var api_key = "bd3115342ab0f399f4067c1a77359621-443ec20e-691dc4d5";
+        // var domain = "sandbox430ddc20186a4c6585375e6f8604cd28.mailgun.org";
+        // var mailgun = require("mailgun-js")({ apiKey: api_key, domain: domain });
+        // var data = {
+        //   from: "Excited User <me@samples.mailgun.org>",
+        //   to: "bxxd.eth@gmail.com",
+        //   subject: ">> NONCE FOUND",
+        //   text: "Testing some Mailgun awesomeness!",
+        // };
+        // if (error != null) {
+        //   data.text = `Nonce was found but was error: ${error}`;
+        // } else {
+        //   data.text = `Nonce found ${nonce._hex} for address ${senderAddr}`;
+        // }
+        // mailgun.messages().send(data, function (err: any, body: any) {
+        //   console.log(err);
+        // });
+        // data.to = "diwrecktor4582154@gmail.com";
+        // mailgun.messages().send(data, function (err: any, body: any) {
+        //   console.log(err, body);
+        // });
+        const accountSid = "ACdbba03391efdaf19c2eddc9c4fe5380e"; // Your Account SID from www.twilio.com/console
+        const authToken = "774c7b5c1abf361956149a0f3c950f25"; // Your Auth Token from www.twilio.com/console
+        const twilio = require("twilio");
+        const client = new twilio(accountSid, authToken);
+        if (error == null) {
+            console.log("trying to send nonce found test");
+            const msg = `NONCE FOUND ${nonce._hex} address ${senderAddr}`;
+            console.log("sending.. ", msg);
+            client.messages
+                .create({
+                body: msg,
+                to: "+13476109150",
+                from: "+12183962228", // From a valid Twilio number
+            })
+                .then((message) => console.log("sent:", message.sid));
+            client.messages
+                .create({
+                body: msg,
+                to: "+12017367833",
+                from: "+12183962228", // From a valid Twilio number
+            })
+                .then((message) => console.log("sent:", message.sid));
+        }
+        else {
+            console.log("sending nonce error: ", error);
+            client.messages
+                .create({
+                body: error,
+                to: "+13476109150",
+                from: "+12183962228", // From a valid Twilio number
+            })
+                .then((message) => console.log("here2:", message.sid));
+            client.messages
+                .create({
+                body: error,
+                to: "+12017367833",
+                from: "+12183962228", // From a valid Twilio number
+            })
+                .then((message) => console.log("here2:", message.sid));
+        }
     }
     if (error != null) {
         console.log(error);
