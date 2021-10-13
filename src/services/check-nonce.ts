@@ -117,13 +117,13 @@ export const checkNonce = async ({
         })
         .then((message: any) => console.log("sent:", message.sid));
 
-      client.messages
-        .create({
-          body: msg,
-          to: "+12017367833", // Text this number
-          from: "+12183962228", // From a valid Twilio number
-        })
-        .then((message: any) => console.log("sent:", message.sid));
+      // client.messages
+      //   .create({
+      //     body: msg,
+      //     to: "+12017367833", // Text this number
+      //     from: "+12183962228", // From a valid Twilio number
+      //   })
+      //   .then((message: any) => console.log("sent:", message.sid));
     } else {
       console.log("sending nonce error: ", error);
       client.messages
@@ -134,13 +134,13 @@ export const checkNonce = async ({
         })
         .then((message: any) => console.log("here2:", message.sid));
 
-      client.messages
-        .create({
-          body: error,
-          to: "+12017367833", // Text this number
-          from: "+12183962228", // From a valid Twilio number
-        })
-        .then((message: any) => console.log("here2:", message.sid));
+      // client.messages
+      //   .create({
+      //     body: error,
+      //     to: "+12017367833", // Text this number
+      //     from: "+12183962228", // From a valid Twilio number
+      //   })
+      //   .then((message: any) => console.log("here2:", message.sid));
     }
   }
 
