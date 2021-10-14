@@ -8,8 +8,8 @@ export type MiningInputs = {
   difficultyTarget: string;
   minorDifficulty: string;
 };
-
-var lastMined: string = null;
+export const minorDifficulty = "0x7a2aff56698420";
+export var lastMined: string = null;
 var lastDifficulty: string = null;
 var lastGet: number = null;
 
@@ -36,7 +36,6 @@ export const getMiningInputs = async ({
   }
 
   const senderAddressBits = getLast72AddressBits(senderAddress)._hex;
-  const minorDifficulty = "0x7a2aff56698420";
 
   return {
     lastMinedAssets,

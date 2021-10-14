@@ -27,7 +27,7 @@ const DEFAULT_PORT = "17394";
 const app = (0, express_1.default)();
 const port = process.env.PORT;
 if (port !== DEFAULT_PORT) {
-    console.warn(`PORT has been changed from the default of ${DEFAULT_PORT}.`);
+    console.warn(`PORT has been changed from the default of ${DEFAULT_PORT} to`, port);
 }
 process.on("SIGINT", function () {
     console.log("SIGINT.");
@@ -61,16 +61,8 @@ function getIP(req) {
     return ip;
 }
 app.get("/submit-work", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/submit-work", req.query);
     try {
-        // if (!process.env.PRIVATE_KEY) {
-        //   throw new Error("PRIVATE_KEY must be set to use this endpoint.");
-        // }
-        // if (!req.query.nonce) {
-        //   throw new Error("Missing nonce query parameter.");
-        // }
-        // const nonce = BigNumber.from(req.query.nonce);
-        // const provider = getProvider();
-        // const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
         const nonce = bignumber_1.BigNumber.from(req.query.nonce);
         const address = req.query.address;
         const submit_work = {
@@ -79,16 +71,10 @@ app.get("/submit-work", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             last: req.query.last || "<empty>",
         };
         console.log("/submit-work", getIP(req), submit_work);
-        // console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
         const isFullyValid = yield (0, check_nonce_1.checkNonce)({
             nonce,
             senderAddr: address,
         });
-        // if (!isFullyValid) {
-        //   throw new Error("Nonce is not valid. Check server logs for info.");
-        // }
-        // const tx = await mint({ nonce, wallet });
-        // res.send(success({ txHash: tx.hash }));
         if (!isFullyValid) {
             throw new Error("Nonce is not valid. Check server logs for info.");
         }
@@ -101,35 +87,27 @@ app.get("/submit-work", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
     }
 }));
 app.get("/submit-ping", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/submit-ping", req.query);
     try {
-        // if (!process.env.PRIVATE_KEY) {
-        //   throw new Error("PRIVATE_KEY must be set to use this endpoint.");
-        // }
         if (!req.query.nonce) {
             throw new Error("Missing nonce query parameter.");
         }
         if (!req.query.address) {
             throw new Error("Missing address parameter.");
         }
+        if (!req.query.src) {
+            throw new Error("Missing src address parameter.");
+        }
         const nonce = bignumber_1.BigNumber.from(req.query.nonce);
         const address = req.query.address;
-        const isFullyValid = yield (0, check_nonce_1.checkNonceLocal)({
+        const isFullyValid = yield (0, check_nonce_1.checkNonceMinor)({
             nonce,
             senderAddr: address,
-            difficulty: bignumber_1.BigNumber.from("0x7a2aff56698420"),
         });
-        // const nonce = BigNumber.from(req.query.nonce);
-        // const provider = getProvider();
-        // const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
-        // const isFullyValid = await checkNonce({
-        //   nonce,
-        //   senderAddr: wallet.address,
-        // });
-        // if (!isFullyValid) {
-        //   throw new Error("Nonce is not valid. Check server logs for info.");
-        // }
-        // const tx = await mint({ nonce, wallet });
-        // res.send(success({ txHash: tx.hash }));
+        console.log("isValid", isFullyValid);
+        if (!isFullyValid) {
+            throw new Error("Nonce is not valid. Does not pass difficulty.");
+        }
         res.send(success({}));
     }
     catch (e) {
