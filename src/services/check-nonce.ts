@@ -7,6 +7,7 @@ import {
 } from "./contracts";
 import { getLast72AddressBits, mpunksSolidityKeccak256 } from "./util";
 import { assetsToPunkId } from "../assets/assets";
+import { addNonceMsg, setNewCurrentAddress } from "./pool";
 
 export const checkNonce = async ({
   nonce,
@@ -29,8 +30,6 @@ export const checkNonce = async ({
 
   if (!passesDifficultyTest) {
     error = `Nonce ${nonce._hex} does not pass difficulty test`;
-    // throw new Error(`Nonce ${nonce._hex} does not pass difficulty test`);
-    // return false;
   } else {
     const seed = mpunksSolidityKeccak256(
       lastMinedAssets,
@@ -43,13 +42,6 @@ export const checkNonce = async ({
     const existingPunkId = await mineablePunks.punkAssetsToId(packedAssets);
 
     if (existingPunkId.gt(BigNumber.from(0))) {
-      // console.error(
-      //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
-      // );
-      // throw new Error(
-      //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
-      // );
-      // return false;
       error = `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`;
     } else {
       const publicCryptopunksData = getPublicCryptopunksData();
@@ -59,17 +51,9 @@ export const checkNonce = async ({
 
       const ogCryptopunkId = assetsToPunkId[assetNames];
       if (ogCryptopunkId) {
-        // console.error(
-        //   `Nonce ${nonce._hex} produces OG CryptoPunk #${ogCryptopunkId}`
-        // );
         error = `Nonce ${nonce._hex} produces OG CryptoPunk #${ogCryptopunkId}`;
-        // return false;
       }
     }
-  }
-
-  if (error != null) {
-    console.log("success");
   }
 
   if (true) {
@@ -146,11 +130,15 @@ export const checkNonce = async ({
     }
   }
 
+  addNonceMsg(nonce._hex, senderAddr, error);
+
   if (error != null) {
     console.log(error);
     return false;
     // throw new Error(error);
   }
+
+  setNewCurrentAddress();
 
   return true;
 };

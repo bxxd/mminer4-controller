@@ -102,7 +102,7 @@ app.get("/submit-ping", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             throw new Error("Missing src address parameter.");
         }
         const nonce = bignumber_1.BigNumber.from(req.query.nonce);
-        const address = req.query.src;
+        const address = req.query.address;
         const isFullyValid = yield (0, check_nonce_1.checkNonceMinor)({
             nonce,
             senderAddr: address,
@@ -112,7 +112,7 @@ app.get("/submit-ping", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             throw new Error("Nonce is not valid. Does not pass difficulty.");
         }
         else {
-            (0, pool_2.updatePing)(address);
+            (0, pool_2.updatePing)(req.query.src);
         }
         res.send(success({}));
     }
@@ -135,6 +135,7 @@ app.get("/mining-inputs", (req, res, next) => __awaiter(void 0, void 0, void 0, 
         next();
     }
 }));
+var lastUpdate = 0;
 app.get("/heartbeat", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const heartbeat = {
@@ -143,6 +144,15 @@ app.get("/heartbeat", (req, res, next) => __awaiter(void 0, void 0, void 0, func
         };
         var rate = parseInt(req.query.hashrate);
         (0, pool_3.addHashrate)(rate);
+        const now = Math.round(Date.now() / 1000);
+        var timeDiff = now - lastUpdate;
+        if (lastUpdate == 0) {
+            lastUpdate = now;
+        }
+        else if (timeDiff > 60) {
+            (0, pool_2.updateInfo)(timeDiff);
+            lastUpdate = now;
+        }
         console.log(getIP(req), heartbeat);
         res.send(success({}));
     }
@@ -172,7 +182,9 @@ var server = app.listen(port, () => __awaiter(void 0, void 0, void 0, function* 
     console.log("Hi There!");
     console.log(config);
     (0, pool_1.poolInit)();
-    (0, pool_2.readInfo)();
+    if (process.env.STICKINESS && process.env.STICKINESS == "true") {
+        (0, pool_2.readInfo)();
+    }
     try {
         console.log("Initializing...");
         for (let envVariable of REQUIRED_ENV_VARIABLES) {

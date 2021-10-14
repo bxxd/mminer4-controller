@@ -9,6 +9,7 @@ export type MiningInputs = {
   minorDifficulty: string;
 };
 export const minorDifficulty = "0x420aff56698420";
+export const fakeDifficulty = "0x220aff56698420";
 export var lastMined: string = null;
 var lastDifficulty: string = null;
 var lastGet: number = null;
@@ -31,6 +32,7 @@ export const getMiningInputs = async ({
     console.log("setting new mining inputs values");
     lastMinedAssets = (await mineablePunks.lastMinedPunkAssets())._hex;
     difficultyTarget = (await mineablePunks.difficultyTarget())._hex;
+    // difficultyTarget = fakeDifficulty;
     lastMined = lastMinedAssets;
     lastDifficulty = difficultyTarget;
     lastGet = Math.round(Date.now() / 1000);

@@ -4,12 +4,48 @@ interface ICount {
 
 var pings: ICount = {};
 var hashrate: number = 0;
+export const info_filename: string = "info.json";
+export const nonces_filename: string = "nonces.txt";
+
 export var current_address: string;
 
 export function poolInit() {
   current_address =
     process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS;
   return true;
+}
+
+export function dateString() {
+  const date = new Date();
+  // get the date as a string
+  const n = date.toDateString();
+
+  // get the time as a string
+  const time = date.toLocaleTimeString();
+
+  return n + " " + time;
+}
+
+export async function addNonceMsg(
+  nonce: string,
+  address: string,
+  error: string
+) {
+  console.log("addNonceMsg..");
+  const fs = require("fs");
+
+  let info = {
+    address: address,
+    error: error,
+    success: error == null,
+    nonce: nonce,
+    ts: dateString(),
+  };
+
+  console.log(info);
+
+  let data = JSON.stringify(info, null, 2);
+  fs.appendFileSync(nonces_filename, data);
 }
 
 export function addHashrate(rate: number) {
@@ -20,8 +56,8 @@ export function addHashrate(rate: number) {
 
 export function readInfo() {
   const fs = require("fs");
-  if (fs.existsSync("info.json")) {
-    let data = fs.readFileSync("info.json");
+  if (fs.existsSync(info_filename)) {
+    let data = fs.readFileSync(info_filename);
 
     let info = JSON.parse(data);
     console.log("info", info);
@@ -37,13 +73,29 @@ export async function updateInfo(timeDiff: number) {
     current: current_address,
     pings: pings,
     hashrate: Math.floor((hashrate * 30) / (timeDiff * 1000000)) + "MH/s",
+    ts: dateString(),
   };
   hashrate = 0;
 
   console.log("updateInfo..", info);
 
   let data = JSON.stringify(info, null, 2);
-  fs.writeFileSync("info.json", data);
+  fs.writeFileSync(info_filename, data);
+}
+
+export function setNewCurrentAddress() {
+  console.log("setNewCurrentAddress..");
+  var max: number = 0;
+  var address: string = current_address;
+  for (const [key, value] of Object.entries(pings)) {
+    if (value > max) {
+      max = value;
+      address = key;
+    }
+  }
+  console.log("setting to", address);
+  pings[address] = 0;
+  current_address = address;
 }
 
 export function updatePing(senderAddr: string) {

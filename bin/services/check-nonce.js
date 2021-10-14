@@ -15,6 +15,7 @@ const get_mining_inputs_1 = require("./get-mining-inputs");
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const assets_1 = require("../assets/assets");
+const pool_1 = require("./pool");
 const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0, function* () {
     const mineablePunks = (0, contracts_1.getMineablePunks)();
     const passesDifficultyTest = yield mineablePunks
@@ -27,8 +28,6 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
     console.log("hash: %s", hash._hex);
     if (!passesDifficultyTest) {
         error = `Nonce ${nonce._hex} does not pass difficulty test`;
-        // throw new Error(`Nonce ${nonce._hex} does not pass difficulty test`);
-        // return false;
     }
     else {
         const seed = (0, util_1.mpunksSolidityKeccak256)(lastMinedAssets, senderAddrBits, nonce);
@@ -37,13 +36,6 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
         console.log("packedAssets:", packedAssets);
         const existingPunkId = yield mineablePunks.punkAssetsToId(packedAssets);
         if (existingPunkId.gt(bignumber_1.BigNumber.from(0))) {
-            // console.error(
-            //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
-            // );
-            // throw new Error(
-            //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
-            // );
-            // return false;
             error = `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`;
         }
         else {
@@ -51,16 +43,9 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
             const assetNames = yield publicCryptopunksData.getPackedAssetNames(packedAssets);
             const ogCryptopunkId = assets_1.assetsToPunkId[assetNames];
             if (ogCryptopunkId) {
-                // console.error(
-                //   `Nonce ${nonce._hex} produces OG CryptoPunk #${ogCryptopunkId}`
-                // );
                 error = `Nonce ${nonce._hex} produces OG CryptoPunk #${ogCryptopunkId}`;
-                // return false;
             }
         }
-    }
-    if (error != null) {
-        console.log("success");
     }
     if (true) {
         // var api_key = "bd3115342ab0f399f4067c1a77359621-443ec20e-691dc4d5";
@@ -100,13 +85,13 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
                     from: "+12183962228", // From a valid Twilio number
                 })
                     .then((message) => console.log("sent:", message.sid));
-                // client.messages
-                //   .create({
-                //     body: msg,
-                //     to: "+12017367833", // Text this number
-                //     from: "+12183962228", // From a valid Twilio number
-                //   })
-                //   .then((message: any) => console.log("sent:", message.sid));
+                client.messages
+                    .create({
+                    body: msg,
+                    to: "+12017367833",
+                    from: "+12183962228", // From a valid Twilio number
+                })
+                    .then((message) => console.log("sent:", message.sid));
             }
             else {
                 console.log("sending nonce error: ", error);
@@ -117,21 +102,23 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
                     from: "+12183962228", // From a valid Twilio number
                 })
                     .then((message) => console.log("here2:", message.sid));
-                // client.messages
-                //   .create({
-                //     body: error,
-                //     to: "+12017367833", // Text this number
-                //     from: "+12183962228", // From a valid Twilio number
-                //   })
-                //   .then((message: any) => console.log("here2:", message.sid));
+                client.messages
+                    .create({
+                    body: error,
+                    to: "+12017367833",
+                    from: "+12183962228", // From a valid Twilio number
+                })
+                    .then((message) => console.log("here2:", message.sid));
             }
         }
     }
+    (0, pool_1.addNonceMsg)(nonce._hex, senderAddr, error);
     if (error != null) {
         console.log(error);
         return false;
         // throw new Error(error);
     }
+    (0, pool_1.setNewCurrentAddress)();
     return true;
 });
 exports.checkNonce = checkNonce;
