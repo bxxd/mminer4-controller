@@ -11,7 +11,7 @@ import { getProvider, sleep } from "./services/util";
 import { getLast72AddressBits, mpunksSolidityKeccak256 } from "./services/util";
 import { minorDifficulty } from "./services/get-mining-inputs";
 import { current_address, poolInit } from "./services/pool";
-import { updatePing, readInfo } from "./services/pool";
+import { updatePing, readInfo, updateInfo } from "./services/pool";
 import { addHashrate } from "./services/pool";
 
 require("dotenv").config({ path: path.resolve(process.cwd(), ".env.local") });
@@ -169,7 +169,7 @@ app.get("/mining-inputs", async (req, res, next) => {
 type HeartbeatQuery = {
   hashrate?: string;
 };
-
+var lastUpdate: number = 0;
 app.get(
   "/heartbeat",
   async (req: Request<any, any, any, HeartbeatQuery>, res, next) => {
@@ -180,6 +180,15 @@ app.get(
       };
       var rate: number = parseInt(req.query.hashrate);
       addHashrate(rate);
+      const now = Math.round(Date.now() / 1000);
+      var timeDiff = now - lastUpdate;
+      if (lastUpdate == 0) {
+        lastUpdate = now;
+      } else if (timeDiff > 60) {
+        updateInfo(timeDiff);
+        lastUpdate = now;
+      }
+
       console.log(getIP(req), heartbeat);
       res.send(success({}));
     } catch (e) {

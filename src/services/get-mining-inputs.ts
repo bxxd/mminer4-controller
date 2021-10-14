@@ -1,6 +1,5 @@
 import { getMineablePunks } from "./contracts";
 import { getLast72AddressBits } from "./util";
-import { updateInfo } from "./pool";
 
 export type MiningInputs = {
   lastMinedAssets: string;
@@ -9,7 +8,7 @@ export type MiningInputs = {
   difficultyTarget: string;
   minorDifficulty: string;
 };
-export const minorDifficulty = "0x8a2aff56698420";
+export const minorDifficulty = "0x420aff56698420";
 export var lastMined: string = null;
 var lastDifficulty: string = null;
 var lastGet: number = null;
@@ -35,7 +34,6 @@ export const getMiningInputs = async ({
     lastMined = lastMinedAssets;
     lastDifficulty = difficultyTarget;
     lastGet = Math.round(Date.now() / 1000);
-    updateInfo(timeDiff);
   }
 
   const senderAddressBits = getLast72AddressBits(senderAddress)._hex;
