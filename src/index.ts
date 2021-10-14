@@ -212,7 +212,9 @@ var server = app.listen(port, async () => {
   console.log("Hi There!");
   console.log(config);
   poolInit();
-  readInfo();
+  if (process.env.STICKINESS) {
+    readInfo();
+  }
   try {
     console.log("Initializing...");
     for (let envVariable of REQUIRED_ENV_VARIABLES) {
