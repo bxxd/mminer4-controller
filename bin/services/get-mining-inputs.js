@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMiningInputs = exports.lastMined = exports.minorDifficulty = void 0;
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
+const pool_1 = require("./pool");
 exports.minorDifficulty = "0x7a2aff56698420";
 exports.lastMined = null;
 var lastDifficulty = null;
@@ -24,7 +25,8 @@ const getMiningInputs = ({ senderAddress, }) => __awaiter(void 0, void 0, void 0
     if (lastGet != null) {
         console.log(now - lastGet);
     }
-    if (lastGet == null || now - lastGet > 300) {
+    var timeDiff = now - lastGet;
+    if (lastGet == null || timeDiff > 300) {
         lastGet = Math.round(Date.now() / 1000);
         console.log("setting new mining inputs values");
         lastMinedAssets = (yield mineablePunks.lastMinedPunkAssets())._hex;
@@ -32,6 +34,7 @@ const getMiningInputs = ({ senderAddress, }) => __awaiter(void 0, void 0, void 0
         exports.lastMined = lastMinedAssets;
         lastDifficulty = difficultyTarget;
         lastGet = Math.round(Date.now() / 1000);
+        (0, pool_1.updateInfo)(timeDiff);
     }
     const senderAddressBits = (0, util_1.getLast72AddressBits)(senderAddress)._hex;
     return {

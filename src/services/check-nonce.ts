@@ -165,7 +165,14 @@ export const checkNonceMinor = async ({
   const lastMinedAssets = BigNumber.from(lastMined);
   const senderAddrBits = getLast72AddressBits(senderAddr);
   const hash = mpunksSolidityKeccak256(lastMinedAssets, senderAddrBits, nonce);
-
-  console.log("hash: %s", hash._hex);
-  return hash < BigNumber.from(minorDifficulty);
+  const minor = BigNumber.from(minorDifficulty);
+  const hashbits = getLast72AddressBits(hash.toHexString());
+  const compressed = BigNumber.from(hashbits);
+  console.log(
+    "hash: %s minor: %s hashbits %s",
+    hash._hex,
+    minor._hex,
+    compressed._hex
+  );
+  return compressed.lt(minor);
 };

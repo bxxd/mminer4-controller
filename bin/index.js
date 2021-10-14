@@ -20,6 +20,9 @@ const path_1 = __importDefault(require("path"));
 const check_nonce_1 = require("./services/check-nonce");
 const get_mining_inputs_1 = require("./services/get-mining-inputs");
 const util_1 = require("./services/util");
+const pool_1 = require("./services/pool");
+const pool_2 = require("./services/pool");
+const pool_3 = require("./services/pool");
 require("dotenv").config({ path: path_1.default.resolve(process.cwd(), ".env.local") });
 var config = require(path_1.default.resolve(process.cwd(), "config.local.js"));
 require("console-stamp")(console, "m-d HH:MM:ss");
@@ -99,7 +102,7 @@ app.get("/submit-ping", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             throw new Error("Missing src address parameter.");
         }
         const nonce = bignumber_1.BigNumber.from(req.query.nonce);
-        const address = req.query.address;
+        const address = req.query.src;
         const isFullyValid = yield (0, check_nonce_1.checkNonceMinor)({
             nonce,
             senderAddr: address,
@@ -107,6 +110,9 @@ app.get("/submit-ping", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         console.log("isValid", isFullyValid);
         if (!isFullyValid) {
             throw new Error("Nonce is not valid. Does not pass difficulty.");
+        }
+        else {
+            (0, pool_2.updatePing)(address);
         }
         res.send(success({}));
     }
@@ -118,18 +124,7 @@ app.get("/submit-ping", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
 }));
 app.get("/mining-inputs", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let senderAddress;
-        if (process.env.PRIVATE_KEY) {
-            const wallet = new wallet_1.Wallet(process.env.PRIVATE_KEY);
-            senderAddress = wallet.address;
-        }
-        else if (process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS) {
-            senderAddress =
-                process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS;
-        }
-        else {
-            throw new Error("PRIVATE_KEY or ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS must be set to use this endpoint.");
-        }
+        let senderAddress = pool_1.current_address;
         const miningInputs = yield (0, get_mining_inputs_1.getMiningInputs)({ senderAddress });
         console.log(getIP(req), miningInputs);
         res.send(success(miningInputs));
@@ -146,6 +141,8 @@ app.get("/heartbeat", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             type: "heartbeat",
             hashrate: req.query.hashrate || "<empty>",
         };
+        var rate = parseInt(req.query.hashrate);
+        (0, pool_3.addHashrate)(rate);
         console.log(getIP(req), heartbeat);
         res.send(success({}));
     }
@@ -174,6 +171,8 @@ const LICENSE_ENV_VARIABLES = [
 var server = app.listen(port, () => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Hi There!");
     console.log(config);
+    (0, pool_1.poolInit)();
+    (0, pool_2.readInfo)();
     try {
         console.log("Initializing...");
         for (let envVariable of REQUIRED_ENV_VARIABLES) {

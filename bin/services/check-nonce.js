@@ -139,8 +139,11 @@ const checkNonceMinor = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, vo
     const lastMinedAssets = bignumber_1.BigNumber.from(get_mining_inputs_1.lastMined);
     const senderAddrBits = (0, util_1.getLast72AddressBits)(senderAddr);
     const hash = (0, util_1.mpunksSolidityKeccak256)(lastMinedAssets, senderAddrBits, nonce);
-    console.log("hash: %s", hash._hex);
-    return hash < bignumber_1.BigNumber.from(get_mining_inputs_1.minorDifficulty);
+    const minor = bignumber_1.BigNumber.from(get_mining_inputs_1.minorDifficulty);
+    const hashbits = (0, util_1.getLast72AddressBits)(hash.toHexString());
+    const compressed = bignumber_1.BigNumber.from(hashbits);
+    console.log("hash: %s minor: %s hashbits %s", hash._hex, minor._hex, compressed._hex);
+    return compressed.lt(minor);
 });
 exports.checkNonceMinor = checkNonceMinor;
 //# sourceMappingURL=check-nonce.js.map

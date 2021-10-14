@@ -10,6 +10,9 @@ import { mint } from "./services/mint";
 import { getProvider, sleep } from "./services/util";
 import { getLast72AddressBits, mpunksSolidityKeccak256 } from "./services/util";
 import { minorDifficulty } from "./services/get-mining-inputs";
+import { current_address, poolInit } from "./services/pool";
+import { updatePing, readInfo } from "./services/pool";
+import { addHashrate } from "./services/pool";
 
 require("dotenv").config({ path: path.resolve(process.cwd(), ".env.local") });
 var config = require(path.resolve(process.cwd(), "config.local.js"));
@@ -125,7 +128,7 @@ app.get(
       }
 
       const nonce = BigNumber.from(req.query.nonce);
-      const address = req.query.address;
+      const address = req.query.src;
 
       const isFullyValid = await checkNonceMinor({
         nonce,
@@ -136,6 +139,8 @@ app.get(
 
       if (!isFullyValid) {
         throw new Error("Nonce is not valid. Does not pass difficulty.");
+      } else {
+        updatePing(address);
       }
 
       res.send(success({}));
@@ -149,20 +154,7 @@ app.get(
 
 app.get("/mining-inputs", async (req, res, next) => {
   try {
-    let senderAddress;
-    if (process.env.PRIVATE_KEY) {
-      const wallet = new Wallet(process.env.PRIVATE_KEY);
-      senderAddress = wallet.address;
-    } else if (
-      process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS
-    ) {
-      senderAddress =
-        process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS;
-    } else {
-      throw new Error(
-        "PRIVATE_KEY or ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS must be set to use this endpoint."
-      );
-    }
+    let senderAddress = current_address;
 
     const miningInputs = await getMiningInputs({ senderAddress });
     console.log(getIP(req), miningInputs);
@@ -175,7 +167,7 @@ app.get("/mining-inputs", async (req, res, next) => {
 });
 
 type HeartbeatQuery = {
-  hashrate?: number;
+  hashrate?: string;
 };
 
 app.get(
@@ -186,6 +178,8 @@ app.get(
         type: "heartbeat",
         hashrate: req.query.hashrate || "<empty>",
       };
+      var rate: number = parseInt(req.query.hashrate);
+      addHashrate(rate);
       console.log(getIP(req), heartbeat);
       res.send(success({}));
     } catch (e) {
@@ -217,6 +211,8 @@ const LICENSE_ENV_VARIABLES = [
 var server = app.listen(port, async () => {
   console.log("Hi There!");
   console.log(config);
+  poolInit();
+  readInfo();
   try {
     console.log("Initializing...");
     for (let envVariable of REQUIRED_ENV_VARIABLES) {
