@@ -128,7 +128,7 @@ app.get(
       }
 
       const nonce = BigNumber.from(req.query.nonce);
-      const address = req.query.src;
+      const address = req.query.address;
 
       const isFullyValid = await checkNonceMinor({
         nonce,
@@ -140,7 +140,7 @@ app.get(
       if (!isFullyValid) {
         throw new Error("Nonce is not valid. Does not pass difficulty.");
       } else {
-        updatePing(address);
+        updatePing(req.query.src);
       }
 
       res.send(success({}));
@@ -212,7 +212,7 @@ var server = app.listen(port, async () => {
   console.log("Hi There!");
   console.log(config);
   poolInit();
-  if (process.env.STICKINESS) {
+  if (process.env.STICKINESS && process.env.STICKINESS == "true") {
     readInfo();
   }
   try {
