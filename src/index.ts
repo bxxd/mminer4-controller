@@ -168,6 +168,8 @@ app.get("/mining-inputs", async (req, res, next) => {
 
 type HeartbeatQuery = {
   hashrate?: string;
+  src?: string;
+  address?: string;
 };
 var lastUpdate: number = 0;
 app.get(
@@ -189,7 +191,7 @@ app.get(
         lastUpdate = now;
       }
 
-      console.log(getIP(req), heartbeat);
+      console.log(getIP(req), req.query.src, heartbeat);
       res.send(success({}));
     } catch (e) {
       res.send(err(e));
