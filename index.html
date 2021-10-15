@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>mminer4</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="assets/favicon_Transparent.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <style type="text/css">
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5vAA.woff) format('woff');
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Me5g.woff) format('woff');
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9vAA.woff) format('woff');
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fCRc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fABc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fCBc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+1F00-1FFF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fBxc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0370-03FF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fCxc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fChc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmSU5fBBc4AMP6lQ.woff2) format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu72xKKTU1Kvnz.woff2) format('woff2');
+            unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu5mxKKTU1Kvnz.woff2) format('woff2');
+            unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu7mxKKTU1Kvnz.woff2) format('woff2');
+            unicode-range: U+1F00-1FFF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu4WxKKTU1Kvnz.woff2) format('woff2');
+            unicode-range: U+0370-03FF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu7WxKKTU1Kvnz.woff2) format('woff2');
+            unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu7GxKKTU1Kvnz.woff2) format('woff2');
+            unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2) format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fCRc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fABc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fCBc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+1F00-1FFF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fBxc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0370-03FF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fCxc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fChc4AMP6lbBP.woff2) format('woff2');
+            unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+        }
+        
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fBBc4AMP6lQ.woff2) format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+    </style>
+    <style type="text/css">
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/materialicons/v109/flUhRq6tzZclQEJ-Vdg-IuiaDsNa.woff) format('woff');
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            font-feature-settings: 'liga';
+        }
+        
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/materialicons/v109/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        /* For all <code> */
+        
+        code {
+            font-family: 'Material Icons', monospace;
+            font-size: inherit;
+            background-color: #eee;
+            word-wrap: break-word;
+            box-decoration-break: clone;
+            padding: .1rem .3rem .2rem;
+            border-radius: .2rem;
+        }
+        /* Code in text */
+        
+        p>code,
+        li>code,
+        dd>code,
+        td>code {
+            background: #ffeff0;
+            word-wrap: break-word;
+            box-decoration-break: clone;
+            padding: .1rem .3rem .2rem;
+            border-radius: .2rem;
+        }
+        
+        pre code {
+            background-color: #eee;
+            border: 1px solid #999;
+            display: block;
+            padding: 10px;
+        }
+        
+        body {
+            line-height: 140%;
+            margin: 50px;
+            width: 650px;
+        }
+    </style>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body class="mat-typography" style="margin:50px">
+    <h3>MMINER4 Mineable Punks Mining Pool</h3>
+    <p><b>**very much beta**</b></p><br>
+    <h5>DESCRIPTION</h5>
+    <p>A mining pool for <a href="https://www.mpunks.org/explore">Mineable Punks NFT</a></p>
+    <p>The mining pool is based on contribution from a minor nonce found. A <a href=http://trust-in.info/score.txt>score</a> is tallied for submitted nonces. When a valid mpunk nonce is found the score of the highest address is picked, that address score
+        is set to zero, and the pool starts mining that address.</p>
+    <p>Nonces found are printed to <a href=http://trust-in.info/nonces.txt>here.</a> (todo: find a better way to deliver nonces, phone number for text, or a url to call for auto-mint)</p>
+    <h4>INSTRUCTIONS</h4>
+    <h5>LINUX</h5>
+    <p>Download pre-built mminer4 from <a href="http://trust-in.info/mminer4">here</a><br></p>
+    <p>Make it executible. <pre><code>chmod +x mminer4</code></pre> </p>
+    <p>Get <a href="http://trust-in.info/dependencies.txt">dependencies</a>. You can install with <code>sh dependencies.txt</code></p>
+    <p>Run with <pre><code>./mminer4 -a 'your_eth_address'</code></pre> For multiple gpu support you can use <code>-x 1</code> flag where number is the gpu ordinal number</p>
+    <p>I run mine like <code>./mminer4 -a 0xE8946EC499a839c72E60bA7d437E28cd73a3f487 > out.log &</code></p>
+    <h5>MINTING</h5>
+    <p>For now have to monitor the <a href=http://trust-in.info/score.txt>score</a> to know when you are mined for and then the <a href=http://trust-in.info/nonces.txt>nonces.</a> The end of the file contains latest nonce found. (todo: clean up nonce file)</p>
+    <p>Go to the <a href="https://etherscan.io/address/0x595a8974c1473717c4b5d456350cd594d9bda687">contract page</a>. Check to see if someone has minted after your nonce is found (nonces are based on last minted assets). The current timezone in the nonces
+        page is UTC. You can translate that using <a href="https://www.worldtimebuddy.com/">https://www.worldtimebuddy.com/</a></p>
+    <p>Convert your nonce into integer using an <a href="https://www.rapidtables.com/convert/number/hex-to-decimal.html">online converter.</a></p>
+    <p>Using a wallet to 'connect to web3' go to the write contract tab in etherscan and in 'mint' put in nonce integer and block <code>0</code>.</p>
+    <p>The gas should be between .04 eth and .08 eth.</p>
+    <p>Mint and enjoy!</p>
+    <p></p>
+    <h5>STATUS</h5>
+    <pre><code><object data="/score.txt" type="text/plain" width="100%" height="auto">
+<a href="http://trust-in.info/score.txt">No Support?</a>
+</object></pre></code>
+    <br>
+    <h5>MINER OPTIONS</h5>
+    <pre><code>
+        -a 'address' - this is the eth address nonce will be submitted to. use 0 if you do not want to be credited. 
+        -x 'cudaDevice' - this is the ordinal number of the device.
+        -cController - use a different controller             
+        -v - print version and exit             
+    </code></pre>
+    <h5>ROADMAP</h5>
+    <p>time is in UTC now</p>
+    <p>needs a bot to post the found stuff to the discord. and a way for people to contribute, but opt out of getting nonces themselves.</p>
+</body>
+
+</html>
