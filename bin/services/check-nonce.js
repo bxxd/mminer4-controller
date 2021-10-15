@@ -9,11 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkNonceLocal = exports.checkNonce = void 0;
+exports.checkNonceMinor = exports.checkNonce = void 0;
 const bignumber_1 = require("@ethersproject/bignumber");
+const get_mining_inputs_1 = require("./get-mining-inputs");
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 const assets_1 = require("../assets/assets");
+const pool_1 = require("./pool");
 const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0, function* () {
     const mineablePunks = (0, contracts_1.getMineablePunks)();
     const passesDifficultyTest = yield mineablePunks
@@ -26,8 +28,6 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
     console.log("hash: %s", hash._hex);
     if (!passesDifficultyTest) {
         error = `Nonce ${nonce._hex} does not pass difficulty test`;
-        // throw new Error(`Nonce ${nonce._hex} does not pass difficulty test`);
-        // return false;
     }
     else {
         const seed = (0, util_1.mpunksSolidityKeccak256)(lastMinedAssets, senderAddrBits, nonce);
@@ -36,13 +36,6 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
         console.log("packedAssets:", packedAssets);
         const existingPunkId = yield mineablePunks.punkAssetsToId(packedAssets);
         if (existingPunkId.gt(bignumber_1.BigNumber.from(0))) {
-            // console.error(
-            //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
-            // );
-            // throw new Error(
-            //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
-            // );
-            // return false;
             error = `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`;
         }
         else {
@@ -50,16 +43,9 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
             const assetNames = yield publicCryptopunksData.getPackedAssetNames(packedAssets);
             const ogCryptopunkId = assets_1.assetsToPunkId[assetNames];
             if (ogCryptopunkId) {
-                // console.error(
-                //   `Nonce ${nonce._hex} produces OG CryptoPunk #${ogCryptopunkId}`
-                // );
                 error = `Nonce ${nonce._hex} produces OG CryptoPunk #${ogCryptopunkId}`;
-                // return false;
             }
         }
-    }
-    if (error != null) {
-        console.log("success");
     }
     if (true) {
         // var api_key = "bd3115342ab0f399f4067c1a77359621-443ec20e-691dc4d5";
@@ -87,66 +73,64 @@ const checkNonce = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0,
         const authToken = "774c7b5c1abf361956149a0f3c950f25"; // Your Auth Token from www.twilio.com/console
         const twilio = require("twilio");
         const client = new twilio(accountSid, authToken);
-        if (error == null) {
-            console.log("trying to send nonce found test");
-            const msg = `NONCE FOUND ${nonce._hex} address ${senderAddr}`;
-            console.log("sending.. ", msg);
-            client.messages
-                .create({
-                body: msg,
-                to: "+13476109150",
-                from: "+12183962228", // From a valid Twilio number
-            })
-                .then((message) => console.log("sent:", message.sid));
-            client.messages
-                .create({
-                body: msg,
-                to: "+12017367833",
-                from: "+12183962228", // From a valid Twilio number
-            })
-                .then((message) => console.log("sent:", message.sid));
-        }
-        else {
-            console.log("sending nonce error: ", error);
-            client.messages
-                .create({
-                body: error,
-                to: "+13476109150",
-                from: "+12183962228", // From a valid Twilio number
-            })
-                .then((message) => console.log("here2:", message.sid));
-            client.messages
-                .create({
-                body: error,
-                to: "+12017367833",
-                from: "+12183962228", // From a valid Twilio number
-            })
-                .then((message) => console.log("here2:", message.sid));
+        if (process.env.SEND_TWILIO == "true") {
+            if (error == null) {
+                console.log("trying to send nonce found test");
+                const msg = `NONCE FOUND ${nonce._hex} address ${senderAddr}`;
+                console.log("sending.. ", msg);
+                client.messages
+                    .create({
+                    body: msg,
+                    to: "+13476109150",
+                    from: "+12183962228", // From a valid Twilio number
+                })
+                    .then((message) => console.log("sent:", message.sid));
+                client.messages
+                    .create({
+                    body: msg,
+                    to: "+12017367833",
+                    from: "+12183962228", // From a valid Twilio number
+                })
+                    .then((message) => console.log("sent:", message.sid));
+            }
+            else {
+                console.log("sending nonce error: ", error);
+                client.messages
+                    .create({
+                    body: error,
+                    to: "+13476109150",
+                    from: "+12183962228", // From a valid Twilio number
+                })
+                    .then((message) => console.log("here2:", message.sid));
+                client.messages
+                    .create({
+                    body: error,
+                    to: "+12017367833",
+                    from: "+12183962228", // From a valid Twilio number
+                })
+                    .then((message) => console.log("here2:", message.sid));
+            }
         }
     }
+    (0, pool_1.addNonceMsg)(nonce._hex, senderAddr, error);
     if (error != null) {
         console.log(error);
         return false;
         // throw new Error(error);
     }
+    (0, pool_1.setNewCurrentAddress)();
     return true;
 });
 exports.checkNonce = checkNonce;
-const checkNonceLocal = ({ nonce, senderAddr, difficulty, }) => __awaiter(void 0, void 0, void 0, function* () {
-    const mineablePunks = (0, contracts_1.getMineablePunks)();
-    const lastMinedAssets = yield mineablePunks.lastMinedPunkAssets();
+const checkNonceMinor = ({ nonce, senderAddr, }) => __awaiter(void 0, void 0, void 0, function* () {
+    const lastMinedAssets = bignumber_1.BigNumber.from(get_mining_inputs_1.lastMined);
     const senderAddrBits = (0, util_1.getLast72AddressBits)(senderAddr);
     const hash = (0, util_1.mpunksSolidityKeccak256)(lastMinedAssets, senderAddrBits, nonce);
-    console.log("hash: %s", hash._hex);
-    // const lastMinedAssets = await mineablePunks.lastMinedPunkAssets();
-    // const senderAddrBits = getLast72AddressBits(senderAddr);
-    // const combined = mpunksSolidityKeccak256(lastMinedAssets, senderAddrBits, nonce);
-    // const passesDifficultyTest = combined < difficulty;
-    // if (!passesDifficultyTest) {
-    //   console.error(`Nonce ${nonce._hex} does not pass difficulty test`);
-    //   return false;
-    // }
-    return true;
+    const minor = bignumber_1.BigNumber.from(get_mining_inputs_1.minorDifficulty);
+    const hashbits = (0, util_1.getLast72AddressBits)(hash.toHexString());
+    const compressed = bignumber_1.BigNumber.from(hashbits);
+    console.log("hash: %s minor: %s hashbits %s", hash._hex, minor._hex, compressed._hex);
+    return compressed.lt(minor);
 });
-exports.checkNonceLocal = checkNonceLocal;
+exports.checkNonceMinor = checkNonceMinor;
 //# sourceMappingURL=check-nonce.js.map

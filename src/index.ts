@@ -4,11 +4,15 @@ import { ethers } from "ethers";
 import express, { Request, response } from "express";
 import path from "path";
 import { exit } from "process";
-import { checkNonce, checkNonceLocal } from "./services/check-nonce";
+import { checkNonce, checkNonceMinor } from "./services/check-nonce";
 import { getMiningInputs } from "./services/get-mining-inputs";
 import { mint } from "./services/mint";
 import { getProvider, sleep } from "./services/util";
 import { getLast72AddressBits, mpunksSolidityKeccak256 } from "./services/util";
+import { minorDifficulty } from "./services/get-mining-inputs";
+import { current_address, poolInit } from "./services/pool";
+import { updatePing, readInfo, updateInfo } from "./services/pool";
+import { addHashrate } from "./services/pool";
 
 require("dotenv").config({ path: path.resolve(process.cwd(), ".env.local") });
 var config = require(path.resolve(process.cwd(), "config.local.js"));
@@ -18,7 +22,10 @@ const DEFAULT_PORT = "17394";
 const app = express();
 const port = process.env.PORT;
 if (port !== DEFAULT_PORT) {
-  console.warn(`PORT has been changed from the default of ${DEFAULT_PORT}.`);
+  console.warn(
+    `PORT has been changed from the default of ${DEFAULT_PORT} to`,
+    port
+  );
 }
 
 process.on("SIGINT", function () {
@@ -36,6 +43,8 @@ process.on("SIGTERM", function () {
 type SubmitPingQuery = {
   nonce?: string;
   address?: string;
+  src?: string;
+  last?: string;
 };
 
 type SubmitWorkQuery = {
@@ -72,19 +81,8 @@ function getIP(req: any) {
 app.get(
   "/submit-work",
   async (req: Request<any, any, any, SubmitWorkQuery>, res, next) => {
+    console.log("/submit-work", req.query);
     try {
-      // if (!process.env.PRIVATE_KEY) {
-      //   throw new Error("PRIVATE_KEY must be set to use this endpoint.");
-      // }
-
-      // if (!req.query.nonce) {
-      //   throw new Error("Missing nonce query parameter.");
-      // }
-
-      // const nonce = BigNumber.from(req.query.nonce);
-      // const provider = getProvider();
-      // const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
-
       const nonce = BigNumber.from(req.query.nonce);
       const address = req.query.address;
 
@@ -95,20 +93,10 @@ app.get(
       };
       console.log("/submit-work", getIP(req), submit_work);
 
-      // console.log("/submit-work address: %s nonce: %s", address, req.query.nonce);
-
       const isFullyValid = await checkNonce({
         nonce,
         senderAddr: address,
       });
-
-      // if (!isFullyValid) {
-      //   throw new Error("Nonce is not valid. Check server logs for info.");
-      // }
-
-      // const tx = await mint({ nonce, wallet });
-
-      // res.send(success({ txHash: tx.hash }));
 
       if (!isFullyValid) {
         throw new Error("Nonce is not valid. Check server logs for info.");
@@ -125,11 +113,8 @@ app.get(
 app.get(
   "/submit-ping",
   async (req: Request<any, any, any, SubmitPingQuery>, res, next) => {
+    console.log("/submit-ping", req.query);
     try {
-      // if (!process.env.PRIVATE_KEY) {
-      //   throw new Error("PRIVATE_KEY must be set to use this endpoint.");
-      // }
-
       if (!req.query.nonce) {
         throw new Error("Missing nonce query parameter.");
       }
@@ -138,31 +123,26 @@ app.get(
         throw new Error("Missing address parameter.");
       }
 
+      if (!req.query.src) {
+        throw new Error("Missing src address parameter.");
+      }
+
       const nonce = BigNumber.from(req.query.nonce);
       const address = req.query.address;
 
-      const isFullyValid = await checkNonceLocal({
+      const isFullyValid = await checkNonceMinor({
         nonce,
         senderAddr: address,
-        difficulty: BigNumber.from("0x7a2aff56698420"),
       });
 
-      // const nonce = BigNumber.from(req.query.nonce);
-      // const provider = getProvider();
-      // const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
+      console.log("isValid", isFullyValid);
 
-      // const isFullyValid = await checkNonce({
-      //   nonce,
-      //   senderAddr: wallet.address,
-      // });
+      if (!isFullyValid) {
+        throw new Error("Nonce is not valid. Does not pass difficulty.");
+      } else {
+        updatePing(req.query.src);
+      }
 
-      // if (!isFullyValid) {
-      //   throw new Error("Nonce is not valid. Check server logs for info.");
-      // }
-
-      // const tx = await mint({ nonce, wallet });
-
-      // res.send(success({ txHash: tx.hash }));
       res.send(success({}));
     } catch (e) {
       res.send(err(e));
@@ -174,20 +154,7 @@ app.get(
 
 app.get("/mining-inputs", async (req, res, next) => {
   try {
-    let senderAddress;
-    if (process.env.PRIVATE_KEY) {
-      const wallet = new Wallet(process.env.PRIVATE_KEY);
-      senderAddress = wallet.address;
-    } else if (
-      process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS
-    ) {
-      senderAddress =
-        process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS;
-    } else {
-      throw new Error(
-        "PRIVATE_KEY or ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS must be set to use this endpoint."
-      );
-    }
+    let senderAddress = current_address;
 
     const miningInputs = await getMiningInputs({ senderAddress });
     console.log(getIP(req), miningInputs);
@@ -200,9 +167,11 @@ app.get("/mining-inputs", async (req, res, next) => {
 });
 
 type HeartbeatQuery = {
-  hashrate?: number;
+  hashrate?: string;
+  src?: string;
+  address?: string;
 };
-
+var lastUpdate: number = 0;
 app.get(
   "/heartbeat",
   async (req: Request<any, any, any, HeartbeatQuery>, res, next) => {
@@ -211,7 +180,18 @@ app.get(
         type: "heartbeat",
         hashrate: req.query.hashrate || "<empty>",
       };
-      console.log(getIP(req), heartbeat);
+      var rate: number = parseInt(req.query.hashrate);
+      addHashrate(rate);
+      const now = Math.round(Date.now() / 1000);
+      var timeDiff = now - lastUpdate;
+      if (lastUpdate == 0) {
+        lastUpdate = now;
+      } else if (timeDiff > 60) {
+        updateInfo(timeDiff);
+        lastUpdate = now;
+      }
+
+      console.log(getIP(req), req.query.src, heartbeat);
       res.send(success({}));
     } catch (e) {
       res.send(err(e));
@@ -242,6 +222,10 @@ const LICENSE_ENV_VARIABLES = [
 var server = app.listen(port, async () => {
   console.log("Hi There!");
   console.log(config);
+  poolInit();
+  if (process.env.STICKINESS && process.env.STICKINESS == "true") {
+    readInfo();
+  }
   try {
     console.log("Initializing...");
     for (let envVariable of REQUIRED_ENV_VARIABLES) {

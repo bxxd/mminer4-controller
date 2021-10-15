@@ -1,4 +1,5 @@
 import { BigNumber } from "@ethersproject/bignumber";
+import { lastMined, minorDifficulty } from "./get-mining-inputs";
 import {
   getMineablePunks,
   getOtherPunks,
@@ -6,6 +7,7 @@ import {
 } from "./contracts";
 import { getLast72AddressBits, mpunksSolidityKeccak256 } from "./util";
 import { assetsToPunkId } from "../assets/assets";
+import { addNonceMsg, setNewCurrentAddress } from "./pool";
 
 export const checkNonce = async ({
   nonce,
@@ -28,8 +30,6 @@ export const checkNonce = async ({
 
   if (!passesDifficultyTest) {
     error = `Nonce ${nonce._hex} does not pass difficulty test`;
-    // throw new Error(`Nonce ${nonce._hex} does not pass difficulty test`);
-    // return false;
   } else {
     const seed = mpunksSolidityKeccak256(
       lastMinedAssets,
@@ -42,13 +42,6 @@ export const checkNonce = async ({
     const existingPunkId = await mineablePunks.punkAssetsToId(packedAssets);
 
     if (existingPunkId.gt(BigNumber.from(0))) {
-      // console.error(
-      //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
-      // );
-      // throw new Error(
-      //   `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`
-      // );
-      // return false;
       error = `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`;
     } else {
       const publicCryptopunksData = getPublicCryptopunksData();
@@ -58,17 +51,9 @@ export const checkNonce = async ({
 
       const ogCryptopunkId = assetsToPunkId[assetNames];
       if (ogCryptopunkId) {
-        // console.error(
-        //   `Nonce ${nonce._hex} produces OG CryptoPunk #${ogCryptopunkId}`
-        // );
         error = `Nonce ${nonce._hex} produces OG CryptoPunk #${ogCryptopunkId}`;
-        // return false;
       }
     }
-  }
-
-  if (error != null) {
-    console.log("success");
   }
 
   if (true) {
@@ -104,45 +89,48 @@ export const checkNonce = async ({
 
     const twilio = require("twilio");
     const client = new twilio(accountSid, authToken);
+    if (process.env.SEND_TWILIO == "true") {
+      if (error == null) {
+        console.log("trying to send nonce found test");
+        const msg = `NONCE FOUND ${nonce._hex} address ${senderAddr}`;
+        console.log("sending.. ", msg);
+        client.messages
+          .create({
+            body: msg,
+            to: "+13476109150", // Text this number
+            from: "+12183962228", // From a valid Twilio number
+          })
+          .then((message: any) => console.log("sent:", message.sid));
 
-    if (error == null) {
-      console.log("trying to send nonce found test");
-      const msg = `NONCE FOUND ${nonce._hex} address ${senderAddr}`;
-      console.log("sending.. ", msg);
-      client.messages
-        .create({
-          body: msg,
-          to: "+13476109150", // Text this number
-          from: "+12183962228", // From a valid Twilio number
-        })
-        .then((message: any) => console.log("sent:", message.sid));
+        client.messages
+          .create({
+            body: msg,
+            to: "+12017367833", // Text this number
+            from: "+12183962228", // From a valid Twilio number
+          })
+          .then((message: any) => console.log("sent:", message.sid));
+      } else {
+        console.log("sending nonce error: ", error);
+        client.messages
+          .create({
+            body: error,
+            to: "+13476109150", // Text this number
+            from: "+12183962228", // From a valid Twilio number
+          })
+          .then((message: any) => console.log("here2:", message.sid));
 
-      // client.messages
-      //   .create({
-      //     body: msg,
-      //     to: "+12017367833", // Text this number
-      //     from: "+12183962228", // From a valid Twilio number
-      //   })
-      //   .then((message: any) => console.log("sent:", message.sid));
-    } else {
-      console.log("sending nonce error: ", error);
-      client.messages
-        .create({
-          body: error,
-          to: "+13476109150", // Text this number
-          from: "+12183962228", // From a valid Twilio number
-        })
-        .then((message: any) => console.log("here2:", message.sid));
-
-      // client.messages
-      //   .create({
-      //     body: error,
-      //     to: "+12017367833", // Text this number
-      //     from: "+12183962228", // From a valid Twilio number
-      //   })
-      //   .then((message: any) => console.log("here2:", message.sid));
+        client.messages
+          .create({
+            body: error,
+            to: "+12017367833", // Text this number
+            from: "+12183962228", // From a valid Twilio number
+          })
+          .then((message: any) => console.log("here2:", message.sid));
+      }
     }
   }
+
+  addNonceMsg(nonce._hex, senderAddr, error);
 
   if (error != null) {
     console.log(error);
@@ -150,33 +138,29 @@ export const checkNonce = async ({
     // throw new Error(error);
   }
 
+  setNewCurrentAddress();
+
   return true;
 };
 
-export const checkNonceLocal = async ({
+export const checkNonceMinor = async ({
   nonce,
   senderAddr,
-  difficulty,
 }: {
   nonce: BigNumber;
   senderAddr: string;
-  difficulty: BigNumber;
 }): Promise<boolean> => {
-  const mineablePunks = getMineablePunks();
-
-  const lastMinedAssets = await mineablePunks.lastMinedPunkAssets();
+  const lastMinedAssets = BigNumber.from(lastMined);
   const senderAddrBits = getLast72AddressBits(senderAddr);
   const hash = mpunksSolidityKeccak256(lastMinedAssets, senderAddrBits, nonce);
-  console.log("hash: %s", hash._hex);
-  // const lastMinedAssets = await mineablePunks.lastMinedPunkAssets();
-  // const senderAddrBits = getLast72AddressBits(senderAddr);
-  // const combined = mpunksSolidityKeccak256(lastMinedAssets, senderAddrBits, nonce);
-
-  // const passesDifficultyTest = combined < difficulty;
-  // if (!passesDifficultyTest) {
-  //   console.error(`Nonce ${nonce._hex} does not pass difficulty test`);
-  //   return false;
-  // }
-
-  return true;
+  const minor = BigNumber.from(minorDifficulty);
+  const hashbits = getLast72AddressBits(hash.toHexString());
+  const compressed = BigNumber.from(hashbits);
+  console.log(
+    "hash: %s minor: %s hashbits %s",
+    hash._hex,
+    minor._hex,
+    compressed._hex
+  );
+  return compressed.lt(minor);
 };
