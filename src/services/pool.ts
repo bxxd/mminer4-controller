@@ -105,8 +105,20 @@ export function setNewCurrentAddress() {
   current_address = address;
 }
 
+var rotation: number = 0;
+
 export function updatePing(senderAddr: string) {
   console.log("updatePing..");
+
+  if (current_address == senderAddr) {
+    rotation += 1;
+    if (rotation > 5) {
+      console.log("skipping ping for current", senderAddr);
+      rotation = 0;
+      return false;
+    }
+  }
+
   if (senderAddr in pings) {
     pings[senderAddr]++;
   } else {

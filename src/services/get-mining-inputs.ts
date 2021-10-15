@@ -1,4 +1,5 @@
 import { getMineablePunks } from "./contracts";
+import { current_address } from "./pool";
 import { getLast72AddressBits } from "./util";
 
 export type MiningInputs = {
@@ -9,6 +10,7 @@ export type MiningInputs = {
   minorDifficulty: string;
 };
 export const minorDifficulty = "0x420aff56698420";
+export const minorMinorDifficulty = "0x120aff56698420";
 export const fakeDifficulty = "0x220aff56698420";
 export var lastMined: string = null;
 var lastDifficulty: string = null;
