@@ -6,6 +6,7 @@ var pings: ICount = {};
 var hashrate: number = 0;
 export const info_filename: string = "info.json";
 export const nonces_filename: string = "nonces.txt";
+export const latest_filename: string = "latest.txt";
 
 export var current_address: string;
 
@@ -46,6 +47,10 @@ export async function addNonceMsg(
 
   let data = JSON.stringify(info, null, 2);
   fs.appendFileSync(nonces_filename, data);
+
+  if (error == null) {
+    fs.writeFileSync(latest_filename, data);
+  }
 }
 
 export function addHashrate(rate: number) {
