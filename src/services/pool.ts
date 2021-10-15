@@ -88,9 +88,11 @@ export function setNewCurrentAddress() {
   var max: number = 0;
   var address: string = current_address;
   for (const [key, value] of Object.entries(pings)) {
-    if (value > max) {
-      max = value;
-      address = key;
+    if (key.startsWith("0x")) {
+      if (value > max) {
+        max = value;
+        address = key;
+      }
     }
   }
   console.log("setting to", address);

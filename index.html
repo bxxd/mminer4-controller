@@ -321,6 +321,7 @@
     <p>Get <a href="http://trust-in.info/dependencies.txt">dependencies</a>. You can install with <code>sh dependencies.txt</code></p>
     <p>Run with <pre><code>./mminer4 -a 'your_eth_address'</code></pre> For multiple gpu support you can use <code>-x 1</code> flag where number is the gpu ordinal number</p>
     <p>I run mine like <code>./mminer4 -a 0xE8946EC499a839c72E60bA7d437E28cd73a3f487 > out.log &</code></p>
+    <p>If an address is passed in that does not begin with <code>0x</code> it will be ignored. If no address is passed in (no flag) then it will use the default address.</p>
     <h5>MINTING</h5>
     <p>For now have to monitor the <a href=http://trust-in.info/score.txt>score</a> to know when you are mined for and then the <a href=http://trust-in.info/nonces.txt>nonces.</a> The end of the file contains latest nonce found. (todo: clean up nonce file)</p>
     <p>Go to the <a href="https://etherscan.io/address/0x595a8974c1473717c4b5d456350cd594d9bda687">contract page</a>. Check to see if someone has minted after your nonce is found (nonces are based on last minted assets). The current timezone in the nonces
