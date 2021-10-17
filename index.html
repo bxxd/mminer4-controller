@@ -353,8 +353,12 @@
 
 
                 const then = Date.parse(ts + " GMT");
+                // var d = Date(then);
+                var myDate = new Date(then)
+                console.log(myDate, then);
                 const since = moment(then).fromNow();
                 $("#fromNow").append(since);
+                $("#date").append(myDate.toLocaleString());
 
                 $("#nonce_int").append(parseInt(nonce, 16));
 
@@ -371,11 +375,11 @@
 
     <div id="latest" class="stats">
         <p>Nonce <code id="nonce"></code> (int <code id="nonce_int"></code>) found for address <code id="latest_address"></code>
-            <span id="fromNow"></span> .</p>
+            <span id="fromNow"></span> at <code id="date"></code></p>
     </div>
     <div id="score" class="stats">
-        <p>Current hashrate is <code id="hashrate"></code> and is mining for address <code id="current_address"></code>. </p>
-        <p><code id="next_address"></code> is next.</p>
+        <p>Current hashrate is <code id="hashrate"></code> and is mining for address <code id="current_address"></code></p>
+        <p><code id="next_address"></code> is next</p>
     </div>
 
 
