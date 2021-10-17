@@ -112,7 +112,7 @@ export function updatePing(senderAddr: string) {
 
   if (current_address == senderAddr) {
     rotation += 1;
-    if (rotation < 4) {
+    if (rotation < 8) {
       console.log("skipping ping for current", senderAddr);
       return false;
     } else {
