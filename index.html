@@ -302,13 +302,83 @@
             margin: 50px;
             width: 650px;
         }
+        
+        .stats {
+            /* font-style: italic; */
+            /* background-color: #eee; */
+            /* border: 1px solid #999;
+            display: block;
+            padding: 10px; */
+            font-size: 16px;
+        }
     </style>
     <link href="//netdna.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://momentjs.com/downloads/moment.js"></script>
+
+    <script>
+        $(function() {
+            $.getJSON('score.txt', function(data) {
+                console.log("score", data);
+                ts = data.ts;
+                current_address = data.current;
+                hashrate = data.hashrate;
+
+
+                var max = 0;
+                var address = current_address;
+                for (const [key, value] of Object.entries(data.pings)) {
+                    if (key.startsWith("0x")) {
+                        if (value > max) {
+                            max = value;
+                            address = key;
+                        }
+                    }
+                }
+
+                $("#hashrate").append(hashrate);
+                $("#current_address").append(current_address);
+                $("#next_address").append(address);
+            });
+        });
+
+        $(function() {
+            $.getJSON('latest.txt', function(data) {
+                console.log("latest", data);
+                ts = data.ts;
+                latest_address = data.address;
+                nonce = data.nonce;
+                $("#nonce").append(nonce);
+                $("#latest_address").append(latest_address);
+
+
+                const then = Date.parse(ts + " GMT");
+                const since = moment(then).fromNow();
+                $("#fromNow").append(since);
+
+                $("#nonce_int").append(parseInt(nonce, 16));
+
+
+            });
+        });
+    </script>
 </head>
 
 <body class="mat-typography" style="margin:50px">
     <h3>MMINER4 Mineable Punks Mining Pool</h3>
-    <p><b>**very much beta**</b></p><br>
+    <p><b>**very much beta**</b></p>
+    <!-- <h6>CURRENT STATS</h6> -->
+
+    <div id="latest" class="stats">
+        <p>Nonce <code id="nonce"></code> (int <code id="nonce_int"></code>) found for address <code id="latest_address"></code>
+            <span id="fromNow"></span> .</p>
+    </div>
+    <div id="score" class="stats">
+        <p>Current hashrate is <code id="hashrate"></code> and is mining for address <code id="current_address"></code>. </p>
+        <p><code id="next_address"></code> is next.</p>
+    </div>
+
+
     <h5>DESCRIPTION</h5>
     <p>A mining pool for <a href="https://www.mpunks.org/explore">Mineable Punks NFT</a></p>
     <p>The mining pool is based on contribution from a minor nonce found. A <a href=http://trust-in.info/score.txt>score</a> is tallied for submitted nonces. When a valid mpunk nonce is found the score of the highest address is picked, that address score
@@ -330,7 +400,10 @@
     <p>Using a wallet to 'connect to web3' go to the write contract tab in etherscan and in 'mint' put in nonce integer and block <code>0</code>.</p>
     <p>The gas should be between .04 eth and .08 eth.</p>
     <p>Mint and enjoy!</p>
-    <p></p>
+    <h5>AUTO-MINTING</h5>
+    <p>To not miss nonces, it is useful to auto-mint the result.</p>
+    <p>The mod for <a href="https://github.com/soualid/mpunks-miner-controller">mpunks-miner-controller</a> can be used to auto-mint the found nonce. Use <a href="http://trust-in.info/latest.txt">http://trust-in.info/latest.txt</a> as the end point to poll.</p>
+    <p>If there is enough money in the wallet, this will trigger an auto mint. </p>
     <h5>STATUS</h5>
     <pre><code><object data="/score.txt" type="text/plain" width="100%" height="auto">
 <a href="http://trust-in.info/score.txt">No Support?</a>
