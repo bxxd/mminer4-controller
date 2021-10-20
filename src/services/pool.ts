@@ -108,7 +108,8 @@ export function setNewCurrentAddress() {
 var rotation: number = 0;
 
 export function updatePing(senderAddr: string) {
-  console.log("updatePing..");
+console.log("updatePing..");
+var inc = 1; 
 
   if (current_address == senderAddr) {
     rotation += 1;
@@ -118,12 +119,17 @@ export function updatePing(senderAddr: string) {
     } else {
       rotation = 0;
     }
-  }
+    }
+    else if (senderAddr == process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS)
+    {
+    inc = Math.floor((Math.random() * 5) + 1);
+    console.log("inc",inc);
+    }
 
   if (senderAddr in pings) {
-    pings[senderAddr]++;
+    pings[senderAddr] += inc;
   } else {
-    pings[senderAddr] = 1;
+    pings[senderAddr] = inc;
   }
 
   console.log(pings);

@@ -153,7 +153,7 @@ app.get("/heartbeat", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             (0, pool_2.updateInfo)(timeDiff);
             lastUpdate = now;
         }
-        console.log(getIP(req), heartbeat);
+        console.log(getIP(req), req.query.src, heartbeat);
         res.send(success({}));
     }
     catch (e) {

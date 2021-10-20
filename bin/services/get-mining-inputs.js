@@ -9,10 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMiningInputs = exports.lastMined = exports.fakeDifficulty = exports.minorDifficulty = void 0;
+exports.getMiningInputs = exports.lastMined = exports.fakeDifficulty = exports.minorMinorDifficulty = exports.minorDifficulty = void 0;
 const contracts_1 = require("./contracts");
 const util_1 = require("./util");
 exports.minorDifficulty = "0x420aff56698420";
+exports.minorMinorDifficulty = "0x120aff56698420";
 exports.fakeDifficulty = "0x220aff56698420";
 exports.lastMined = null;
 var lastDifficulty = null;
@@ -26,7 +27,7 @@ const getMiningInputs = ({ senderAddress, }) => __awaiter(void 0, void 0, void 0
         console.log(now - lastGet);
     }
     var timeDiff = now - lastGet;
-    if (lastGet == null || timeDiff > 300) {
+    if (lastGet == null || timeDiff > 30) {
         lastGet = Math.round(Date.now() / 1000);
         console.log("setting new mining inputs values");
         lastMinedAssets = (yield mineablePunks.lastMinedPunkAssets())._hex;
