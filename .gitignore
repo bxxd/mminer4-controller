@@ -9,6 +9,7 @@ yarn.lock
 
 *.js.map
 *.js
+bin/
 
 .env.local
 # config.local.js
