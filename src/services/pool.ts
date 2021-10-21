@@ -11,8 +11,7 @@ export const latest_filename: string = "latest.txt";
 export var current_address: string;
 
 export function poolInit() {
-  current_address =
-    process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS;
+  current_address = process.env.DEFAULT_ETH_MINING_ADDRESS;
   return true;
 }
 
@@ -108,8 +107,8 @@ export function setNewCurrentAddress() {
 var rotation: number = 0;
 
 export function updatePing(senderAddr: string) {
-console.log("updatePing..");
-var inc = 1; 
+  console.log("updatePing..");
+  var inc = 1;
 
   if (current_address == senderAddr) {
     rotation += 1;
@@ -119,12 +118,7 @@ var inc = 1;
     } else {
       rotation = 0;
     }
-    }
-    else if (senderAddr == process.env.ONLY_NEEDED_IF_NOT_INCLUDING_PRIVATE_KEY_WALLET_ADDRESS)
-    {
-    inc = Math.floor((Math.random() * 5) + 1);
-    console.log("inc",inc);
-    }
+  }
 
   if (senderAddr in pings) {
     pings[senderAddr] += inc;

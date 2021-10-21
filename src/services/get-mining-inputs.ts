@@ -1,5 +1,4 @@
 import { getMineablePunks } from "./contracts";
-import { current_address } from "./pool";
 import { getLast72AddressBits } from "./util";
 
 export type MiningInputs = {
@@ -29,7 +28,7 @@ export const getMiningInputs = async ({
     console.log(now - lastGet);
   }
   var timeDiff = now - lastGet;
-  if (lastGet == null || timeDiff > 30) {
+  if (lastGet == null || timeDiff > 120) {
     lastGet = Math.round(Date.now() / 1000);
     console.log("setting new mining inputs values");
     lastMinedAssets = (await mineablePunks.lastMinedPunkAssets())._hex;

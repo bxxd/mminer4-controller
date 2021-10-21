@@ -3,19 +3,24 @@ import { Wallet } from "@ethersproject/wallet";
 import { ethers } from "ethers";
 import express, { Request, response } from "express";
 import path from "path";
-import { exit } from "process";
+// import { exit } from "process";
 import { checkNonce, checkNonceMinor } from "./services/check-nonce";
 import { getMiningInputs } from "./services/get-mining-inputs";
-import { mint } from "./services/mint";
-import { getProvider, sleep } from "./services/util";
-import { getLast72AddressBits, mpunksSolidityKeccak256 } from "./services/util";
-import { minorDifficulty } from "./services/get-mining-inputs";
+// import { mint } from "./services/mint";
+import {
+  checkIfGasTooHigh,
+  GAS_STATUS,
+  getProvider,
+  sleep,
+} from "./services/util";
+// import { getLast72AddressBits, mpunksSolidityKeccak256 } from "./services/util";
+// import { minorDifficulty } from "./services/get-mining-inputs";
 import { current_address, poolInit } from "./services/pool";
 import { updatePing, readInfo, updateInfo } from "./services/pool";
 import { addHashrate } from "./services/pool";
+import { mint } from "./services/mint";
 
 require("dotenv").config({ path: path.resolve(process.cwd(), ".env.local") });
-var config = require(path.resolve(process.cwd(), "config.local.js"));
 require("console-stamp")(console, "m-d HH:MM:ss");
 
 const DEFAULT_PORT = "17394";
@@ -28,14 +33,17 @@ if (port !== DEFAULT_PORT) {
   );
 }
 
+var destructing = false;
 process.on("SIGINT", function () {
   console.log("SIGINT.");
+  destructing = true;
   server.close();
   process.exit();
 });
 
 process.on("SIGTERM", function () {
   console.log("SIGTERM.");
+  destructing = true;
   server.close();
   process.exit();
 });
@@ -100,7 +108,27 @@ app.get(
 
       if (!isFullyValid) {
         throw new Error("Nonce is not valid. Check server logs for info.");
+      } else if (process.env.MINT_WORK == "true") {
+        const provider = getProvider();
+        const gasStatus = await checkIfGasTooHigh({
+          provider,
+          maxGasGwei: process.env.MAX_GAS_PRICE_GWEI,
+        });
+
+        if (gasStatus == GAS_STATUS.GAS_TOO_HIGH) {
+          console.log(
+            `Nonce is valid, but gas price is higher than configured MAX_GAS_PRICE_GWEI of ${process.env.MAX_GAS_PRICE_GWEI}`
+          );
+          res.send(err({ gasStatus }));
+        } else {
+          const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
+
+          const tx = await mint({ nonce, wallet });
+          console.log(`Nonce submission transaction hash: ${tx.hash}`);
+          res.send(success({ gasStatus, txHash: tx.hash }));
+        }
       }
+
       res.send(success({}));
     } catch (e) {
       res.send(err(e));
@@ -211,6 +239,16 @@ const REQUIRED_ENV_VARIABLES = [
   "ACCEPT_MAX_GAS_PRICE_GWEI_VALUE",
   "ACCEPT_LICENSE",
   "READ_NOTICE",
+  "DEFAULT_ETH_MINING_ADDRESS",
+];
+
+const REQUIRED_MINT_VARIABLES = ["PRIVATE_KEY"];
+
+const REQUIRED_TWILIO_VARIABLES = [
+  "TWILIO_ACCOUNTSID",
+  "TWILIO_AUTHTOKEN",
+  "TWILIO_FROM",
+  "TWILIO_TO_1",
 ];
 
 const LICENSE_ENV_VARIABLES = [
@@ -221,7 +259,6 @@ const LICENSE_ENV_VARIABLES = [
 
 var server = app.listen(port, async () => {
   console.log("Hi There!");
-  console.log(config);
   poolInit();
   if (process.env.STICKINESS && process.env.STICKINESS == "true") {
     readInfo();
@@ -240,6 +277,34 @@ var server = app.listen(port, async () => {
       }
     }
 
+    if (process.env.SEND_TWILIO && process.env.SEND_TWILIO == "true") {
+      for (let envVariable of REQUIRED_TWILIO_VARIABLES) {
+        if (
+          process.env[envVariable] === undefined ||
+          process.env[envVariable] === null ||
+          process.env[envVariable].length === 0
+        ) {
+          throw new Error(
+            `Required SEND_TWILIO environment variable ${envVariable} is missing from .env.local`
+          );
+        }
+      }
+    }
+
+    if (process.env.MINT_WORK && process.env.MINT_WORK == "true") {
+      for (let envVariable of REQUIRED_MINT_VARIABLES) {
+        if (
+          process.env[envVariable] === undefined ||
+          process.env[envVariable] === null ||
+          process.env[envVariable].length === 0
+        ) {
+          throw new Error(
+            `Required MINT_WORK environment variable ${envVariable} is missing from .env.local`
+          );
+        }
+      }
+    }
+
     for (let envVariable of LICENSE_ENV_VARIABLES) {
       if (process.env[envVariable] !== "true") {
         throw new Error(
@@ -248,7 +313,7 @@ var server = app.listen(port, async () => {
       }
     }
 
-    if (process.env.PRIVATE_KEY) {
+    if (process.env.MINT_WORK == "true" && process.env.PRIVATE_KEY) {
       console.log("Attempting to fetch wallet balance as a test...");
       const provider = getProvider();
       const wallet = new Wallet(process.env.PRIVATE_KEY);
@@ -264,7 +329,7 @@ var server = app.listen(port, async () => {
       "Keeping the console up so that you can see the error. Close out of the application whenever..."
     );
 
-    while (true) {
+    while (!destructing) {
       await sleep(300);
     }
   }

@@ -9,8 +9,10 @@ export function mpunksSolidityKeccak256(
   addressBits: BigNumber,
   nonce: BigNumber
 ): BigNumber {
-  const p = solidityPack(["uint96", "uint72", "uint88"],
-  [lastMinedAssets, addressBits, nonce]);
+  const p = solidityPack(
+    ["uint96", "uint72", "uint88"],
+    [lastMinedAssets, addressBits, nonce]
+  );
   console.log(p);
   const h = solidityKeccak256(
     ["uint96", "uint72", "uint88"],
@@ -37,17 +39,27 @@ export const getProvider = (): Web3Provider => {
   return provider;
 };
 
-export const checkIfGasTooHigh = async ({ provider, maxGasGwei }: { provider: Web3Provider, maxGasGwei: string }) => {
-  const maxGasPriceWei = ethers.utils.parseUnits(
-    maxGasGwei,
-    "gwei"
-  );
-
-  const currentGasPrice = await provider.getGasPrice()
-
-  return currentGasPrice.gt(maxGasPriceWei)
+export enum GAS_STATUS {
+  GAS_TOO_HIGH = "GAS_TOO_HIGH",
+  GAS_VALID = "GAS_VALID",
 }
 
+export const checkIfGasTooHigh = async ({
+  provider,
+  maxGasGwei,
+}: {
+  provider: Web3Provider;
+  maxGasGwei: string;
+}): Promise<GAS_STATUS> => {
+  const maxGasPriceWei = ethers.utils.parseUnits(maxGasGwei, "gwei");
+
+  const currentGasPrice = await provider.getGasPrice();
+
+  return currentGasPrice.gt(maxGasPriceWei)
+    ? GAS_STATUS.GAS_TOO_HIGH
+    : GAS_STATUS.GAS_VALID;
+};
+
 export async function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

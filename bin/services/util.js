@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sleep = exports.checkIfGasTooHigh = exports.getProvider = exports.getLast72AddressBits = exports.mpunksSolidityKeccak256 = void 0;
+exports.sleep = exports.checkIfGasTooHigh = exports.GAS_STATUS = exports.getProvider = exports.getLast72AddressBits = exports.mpunksSolidityKeccak256 = void 0;
 const utils_1 = require("ethers/lib/utils");
 const providers_1 = require("@ethersproject/providers");
 const bignumber_1 = require("@ethersproject/bignumber");
@@ -38,15 +38,22 @@ const getProvider = () => {
     return provider;
 };
 exports.getProvider = getProvider;
-const checkIfGasTooHigh = ({ provider, maxGasGwei }) => __awaiter(void 0, void 0, void 0, function* () {
+var GAS_STATUS;
+(function (GAS_STATUS) {
+    GAS_STATUS["GAS_TOO_HIGH"] = "GAS_TOO_HIGH";
+    GAS_STATUS["GAS_VALID"] = "GAS_VALID";
+})(GAS_STATUS = exports.GAS_STATUS || (exports.GAS_STATUS = {}));
+const checkIfGasTooHigh = ({ provider, maxGasGwei, }) => __awaiter(void 0, void 0, void 0, function* () {
     const maxGasPriceWei = ethers_1.ethers.utils.parseUnits(maxGasGwei, "gwei");
     const currentGasPrice = yield provider.getGasPrice();
-    return currentGasPrice.gt(maxGasPriceWei);
+    return currentGasPrice.gt(maxGasPriceWei)
+        ? GAS_STATUS.GAS_TOO_HIGH
+        : GAS_STATUS.GAS_VALID;
 });
 exports.checkIfGasTooHigh = checkIfGasTooHigh;
 function sleep(ms) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms));
     });
 }
 exports.sleep = sleep;

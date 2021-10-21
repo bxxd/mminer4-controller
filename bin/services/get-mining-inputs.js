@@ -27,7 +27,7 @@ const getMiningInputs = ({ senderAddress, }) => __awaiter(void 0, void 0, void 0
         console.log(now - lastGet);
     }
     var timeDiff = now - lastGet;
-    if (lastGet == null || timeDiff > 30) {
+    if (lastGet == null || timeDiff > 120) {
         lastGet = Math.round(Date.now() / 1000);
         console.log("setting new mining inputs values");
         lastMinedAssets = (yield mineablePunks.lastMinedPunkAssets())._hex;
