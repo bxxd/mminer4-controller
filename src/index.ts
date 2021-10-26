@@ -174,7 +174,7 @@ app.get(
       if (!isFullyValid) {
         throw new Error("Nonce is not valid. Does not pass difficulty.");
       } else {
-        updatePing(req.query.src);
+        updatePing(src);
       }
 
       res.send(success({}));
