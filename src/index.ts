@@ -155,14 +155,14 @@ app.get(
         throw new Error("Missing src address parameter.");
       }
 
-      if (req.query.src == process.env.SUPPRESS_ADDRESS) {
-        console.log("suppressing..");
-        res.send(success({ msg: "suppressed" }));
-        return;
-      }
-
       const nonce = BigNumber.from(req.query.nonce);
       const address = req.query.address;
+      var src = req.query.src;
+
+      if (src == process.env.SUPPRESS_ADDRESS) {
+        console.log("suppressing..");
+        src = "default";
+      }
 
       const isFullyValid = await checkNonceMinor({
         nonce,
