@@ -360,7 +360,7 @@
                 $("#fromNow").append(since);
                 $("#date").append(myDate.toLocaleString());
 
-                $("#nonce_int").append(parseInt(nonce, 16));
+                $("#nonce_int").append(BigInt(nonce)+"");
 
 
             });
