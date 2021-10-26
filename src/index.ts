@@ -156,6 +156,7 @@ app.get(
       }
 
       if (req.query.src == process.env.SUPPRESS_ADDRESS) {
+        console.log("suppressing..");
         res.send(success({ msg: "suppressed" }));
         return;
       }
