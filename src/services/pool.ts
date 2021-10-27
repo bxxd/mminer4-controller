@@ -1,3 +1,5 @@
+import { lastMined } from "./get-mining-inputs";
+
 interface ICount {
   [details: string]: number;
 }
@@ -39,6 +41,7 @@ export async function addNonceMsg(
     error: error,
     success: error == null,
     nonce: nonce,
+    last: lastMined,
     ts: dateString(),
   };
 
