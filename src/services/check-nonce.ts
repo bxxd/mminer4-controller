@@ -40,12 +40,13 @@ export const checkNonce = async ({
     const packedAssets = await otherPunks.seedToPunkAssets(seed);
     console.log("packedAssets:", packedAssets);
     const existingPunkId = await mineablePunks.punkAssetsToId(packedAssets);
+    var assetNames = "";
 
     if (existingPunkId.gt(BigNumber.from(0))) {
       error = `Nonce ${nonce._hex} produces existing mpunk #${existingPunkId}`;
     } else {
       const publicCryptopunksData = getPublicCryptopunksData();
-      const assetNames = await publicCryptopunksData.getPackedAssetNames(
+      assetNames = await publicCryptopunksData.getPackedAssetNames(
         packedAssets
       );
 
@@ -112,7 +113,7 @@ export const checkNonce = async ({
     }
   }
 
-  addNonceMsg(nonce._hex, senderAddr, error);
+  addNonceMsg(nonce._hex, senderAddr, error, assetNames);
 
   if (error != null) {
     console.log(error);

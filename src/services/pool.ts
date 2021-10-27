@@ -31,7 +31,8 @@ export function dateString() {
 export async function addNonceMsg(
   nonce: string,
   address: string,
-  error: string
+  error: string,
+  punk: string
 ) {
   console.log("addNonceMsg..");
   const fs = require("fs");
@@ -42,6 +43,7 @@ export async function addNonceMsg(
     success: error == null,
     nonce: nonce,
     last: lastMined,
+    punk: punk,
     ts: dateString(),
   };
 
