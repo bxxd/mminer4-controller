@@ -128,8 +128,8 @@ export function updatePing(senderAddr: string) {
       rotation = 0;
     }
   }
-  if (senderAddr == "DEFAULT_ETH_MINING_ADDRESS") {
-    inc = getRandomInt(8);
+  if (senderAddr == process.env.DEFAULT_ETH_MINING_ADDRESS) {
+    inc = getRandomInt(5);
   }
 
   if (senderAddr in pings) {
