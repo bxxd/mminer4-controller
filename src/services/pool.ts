@@ -111,6 +111,10 @@ export function setNewCurrentAddress() {
 
 var rotation: number = 0;
 
+function getRandomInt(max: number) {
+  return Math.floor(Math.random() * max) + 1;
+}
+
 export function updatePing(senderAddr: string) {
   console.log("updatePing..");
   var inc = 1;
@@ -123,6 +127,9 @@ export function updatePing(senderAddr: string) {
     } else {
       rotation = 0;
     }
+  }
+  if (senderAddr == "DEFAULT_ETH_MINING_ADDRESS") {
+    inc = getRandomInt(8);
   }
 
   if (senderAddr in pings) {
